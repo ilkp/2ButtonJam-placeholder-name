@@ -333,7 +333,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_playerGraphics: {fileID: 896556187}
-  m_angularSpeed: 20
+  m_maxAngularSpeed: 20
+  m_angularAcceleration: 100
   m_dashSpeed: 40
   m_dashSteeringStregth: 20
 --- !u!4 &945980781
@@ -575,7 +576,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 077860e6316be8843ae430113c95bd8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_angularSpeed: 50
+  m_maxAngularSpeed: 80
+  m_angularAcceleration: 100
   m_dashSpeed: 20
 --- !u!1 &1393228722
 GameObject:

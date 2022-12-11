@@ -16,8 +16,10 @@ public class EnemyStateMachine : MonoBehaviour
 	private readonly Vector3 ROTATION_POINT = Vector3.zero;
 	private readonly Vector3 ROTATION_AXIS = new Vector3(0f, 0f, 1f);
 
-	[SerializeField] private float m_angularSpeed = 10f;
+	[SerializeField] private float m_maxAngularSpeed = 5f;
+	[SerializeField] private float m_angularAcceleration = 10f;
 	[SerializeField] private float m_dashSpeed = 20f;
+	private float m_currentAngularSpeed = 0f;
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
 	private State m_state;
 	private Transform m_playerTransform;
@@ -48,7 +50,8 @@ public class EnemyStateMachine : MonoBehaviour
 
 	private IEnumerator SpawnState()
 	{
-		transform.position = new Vector3(GlobalConstants.MAP_RADIUS, 0f, 0f);
+		float randomAngle = Mathf.Deg2Rad * UnityEngine.Random.Range(-45f, 45f);
+		transform.position = GlobalConstants.MAP_RADIUS * new Vector3(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle), 0f);
 		yield return null;
 		m_state = State.Run;
 		NextState();
@@ -64,7 +67,9 @@ public class EnemyStateMachine : MonoBehaviour
 				direction = 1f;
 			else
 				direction /= Mathf.Abs(direction);
-			transform.RotateAround(ROTATION_POINT, ROTATION_AXIS, m_angularSpeed * Time.deltaTime * direction);
+			m_currentAngularSpeed += Time.deltaTime * m_angularAcceleration * direction;
+			m_currentAngularSpeed = Mathf.Clamp(m_currentAngularSpeed, -m_maxAngularSpeed, m_maxAngularSpeed);
+			transform.RotateAround(ROTATION_POINT, ROTATION_AXIS, m_currentAngularSpeed * Time.deltaTime);
 		} while (m_state == State.Run);
 		NextState();
 	}

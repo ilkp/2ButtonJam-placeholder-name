@@ -18,9 +18,11 @@ public class PlayerStateMachine : MonoBehaviour
 	private readonly Vector3 ROTATION_AXIS = new Vector3(0f, 0f, 1f);
 
 	[SerializeField] private Transform m_playerGraphics;
-	[SerializeField] private float m_angularSpeed = 10f;
+	[SerializeField] private float m_maxAngularSpeed = 20f;
+	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
 	[SerializeField] private float m_dashSteeringStregth = 20f;
+	private float m_angularSpeed = 0f;
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
 	private State m_state;
 
@@ -72,19 +74,25 @@ public class PlayerStateMachine : MonoBehaviour
 	private IEnumerator RunState()
 	{
 		float timer = 0f;
+		m_angularSpeed = 0f;
 		do
 		{
 			yield return null;
 			float direction = 0f;
 			if (Input.GetKey(m_leftKey))
+			{
 				direction -= 1f;
-			if (Input.GetKey(m_rightKey))
-				direction += 1f;
-			transform.RotateAround(ROTATION_POINT, ROTATION_AXIS, direction * m_angularSpeed * Time.deltaTime);
-			if (Input.GetKey(m_leftKey))
 				m_playerGraphics.transform.LookAt(transform.position - new Vector3(0f, 0f, 1f), transform.up);
-			else if (Input.GetKey(m_rightKey))
+			}
+			if (Input.GetKey(m_rightKey))
+			{
+				direction += 1f;
 				m_playerGraphics.transform.LookAt(transform.position + new Vector3(0f, 0f, 1f), transform.up);
+			}
+
+			m_angularSpeed += Time.deltaTime * m_angularAcceleration * direction;
+			m_angularSpeed = Mathf.Clamp(m_angularSpeed, -m_maxAngularSpeed, m_maxAngularSpeed);
+			transform.RotateAround(ROTATION_POINT, ROTATION_AXIS, m_angularSpeed * Time.deltaTime);
 
 			if (Input.GetKey(m_leftKey) && Input.GetKey(m_rightKey) && m_state == State.Run)
 			{

@@ -21,7 +21,7 @@ public class CollectableSpawner : MonoBehaviour
 		{
 			m_timer = 0f;
 			GameObject go = Instantiate(m_collectablePrefab);
-			float randomAngle = Random.Range(0f, 360f);
+			float randomAngle = Mathf.Deg2Rad * Random.Range(0f, 360f);
 			float randomDistance = Random.Range(0f, GlobalConstants.MAP_RADIUS);
 			go.transform.position = randomDistance * new Vector3(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle), 0f);
 			m_activeCollectables.Add(go);
