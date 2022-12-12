@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class EnemyStateMachine : MonoBehaviour
+public class EnemyChaserStateMachine : MonoBehaviour
 {
 	private enum State
 	{

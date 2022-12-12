@@ -17,17 +17,18 @@ public class PlayerStateMachine : MonoBehaviour
 	private readonly Vector3 ROTATION_POINT = Vector3.zero;
 	private readonly Vector3 ROTATION_AXIS = new Vector3(0f, 0f, 1f);
 
+	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
+	private KeyCode m_leftKey = KeyCode.LeftArrow;
+	private KeyCode m_rightKey = KeyCode.RightArrow;
+
 	[SerializeField] private Transform m_playerGraphics;
 	[SerializeField] private float m_maxAngularSpeed = 20f;
 	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
 	[SerializeField] private float m_dashSteeringStregth = 20f;
 	private float m_angularSpeed = 0f;
-	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
 	private State m_state;
 
-	private KeyCode m_leftKey = KeyCode.LeftArrow;
-	private KeyCode m_rightKey = KeyCode.RightArrow;
 
 	private void Awake()
 	{
@@ -50,11 +51,6 @@ public class PlayerStateMachine : MonoBehaviour
 		}
 		m_state = State.Spawn;
 		NextState();
-	}
-
-	private void SetGraphicsDirection()
-	{
-
 	}
 
 	private void NextState()
@@ -94,7 +90,7 @@ public class PlayerStateMachine : MonoBehaviour
 			m_angularSpeed = Mathf.Clamp(m_angularSpeed, -m_maxAngularSpeed, m_maxAngularSpeed);
 			transform.RotateAround(ROTATION_POINT, ROTATION_AXIS, m_angularSpeed * Time.deltaTime);
 
-			if (Input.GetKey(m_leftKey) && Input.GetKey(m_rightKey) && m_state == State.Run)
+			if (Input.GetKey(m_leftKey) && Input.GetKey(m_rightKey))
 			{
 				timer += Time.deltaTime;
 				if (timer >= 0.1f)
