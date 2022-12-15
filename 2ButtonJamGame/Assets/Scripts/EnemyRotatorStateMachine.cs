@@ -14,6 +14,7 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 		Death
 	}
 
+	private const EnemyType m_type = EnemyType.Rotator;
 	private readonly int RUN_ANIMATION = Animator.StringToHash("ChaserAnimationRun");
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
 	private State m_state;
@@ -83,6 +84,7 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 	private IEnumerator DeathState()
 	{
 		yield return null;
+		Spawner.Instance.RemoveEnemy(m_type);
 		Destroy(gameObject);
 	}
 }

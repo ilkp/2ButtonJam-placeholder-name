@@ -15,6 +15,7 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 		Death
 	}
 
+	private const EnemyType m_type = EnemyType.Chaser;
 	private readonly int RUN_ANIMATION = Animator.StringToHash("ChaserAnimationRun");
 
 	[SerializeField] private float m_maxAngularSpeed = 5f;
@@ -84,6 +85,7 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 				moveDirection /= Mathf.Abs(moveDirection);
 			m_currentAngularSpeed += Time.deltaTime * m_angularAcceleration * moveDirection;
 			m_currentAngularSpeed = Mathf.Clamp(m_currentAngularSpeed, -m_maxAngularSpeed, m_maxAngularSpeed);
+			m_animator.speed = Mathf.Clamp(Mathf.Abs(m_currentAngularSpeed) / m_maxAngularSpeed, 0.2f, 1f);
 			transform.RotateAround(GlobalConstants.ROTATION_POINT, GlobalConstants.ROTATION_AXIS, m_currentAngularSpeed * Time.deltaTime);
 			transform.rotation = Quaternion.identity;
 
@@ -98,6 +100,7 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 	private IEnumerator DeathState()
 	{
 		yield return null;
+		Spawner.Instance.RemoveEnemy(m_type);
 		Destroy(gameObject);
 	}
 }

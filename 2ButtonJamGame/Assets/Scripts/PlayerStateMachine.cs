@@ -134,7 +134,6 @@ public class PlayerStateMachine : MonoBehaviour
 			case PickupType.Score:
 				break;
 			case PickupType.PowerupCharge:
-				Debug.Log(PowerupCharges);
 				Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
 				PowerupChargesChanged?.Invoke();
 				break;
