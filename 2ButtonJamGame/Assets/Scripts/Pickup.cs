@@ -15,7 +15,7 @@ public class Pickup : MonoBehaviour
 		if (collision.CompareTag("Player"))
 		{
 			GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerStateMachine>().ReceivePickup(type);
-			PickupSpawner.Instance.RemovePickup(type);
+			Spawner.Instance.RemovePickup(type);
 			Destroy(gameObject);
 		}
 	}
