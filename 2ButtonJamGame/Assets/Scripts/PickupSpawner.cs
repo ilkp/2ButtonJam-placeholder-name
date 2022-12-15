@@ -37,7 +37,7 @@ public class PickupSpawner : MonoBehaviour
 		m_pickups = new Dictionary<PickupType, PickupMetaData>
 		{
 			{ PickupType.Score, new() { maxAlive = 1, spawnTime = 5f, prefab = (GameObject)Resources.Load("Prefabs/ScorePickupPrefab") } },
-			{ PickupType.Powerup, new() { maxAlive = 1, spawnTime = 1f, prefab = (GameObject)Resources.Load("Prefabs/PowerupPickupPrefab") } },
+			{ PickupType.Powerup, new() { maxAlive = 1, spawnTime = 15f, prefab = (GameObject)Resources.Load("Prefabs/PowerupPickupPrefab") } },
 			{ PickupType.PowerupCharge, new() { maxAlive = 1, spawnTime = 5f, prefab = (GameObject)Resources.Load("Prefabs/PowerupChargePickupPrefab") } }
 		};
 	}

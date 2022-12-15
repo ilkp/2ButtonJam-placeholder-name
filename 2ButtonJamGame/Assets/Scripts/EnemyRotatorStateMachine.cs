@@ -4,19 +4,26 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class EnemyRotatorStateMachine : MonoBehaviour
+[RequireComponent(typeof(Animator))]
+public class EnemyRotatorStateMachine : EnemyStateMachine
 {
 	private enum State
 	{
 		Spawn,
-		Rotate
+		Rotate,
+		Death
 	}
 
+	private readonly int RUN_ANIMATION = Animator.StringToHash("ChaserAnimationRun");
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
 	private State m_state;
+	private int m_rotationDirection;
+	private float m_angularVelocity = 20f;
+	private bool m_dead = false;
 
 	private void Start()
 	{
+		gameObject.tag = "Enemy";
 		// We add states and corresponding function names into dictionary for easy access
 		string[] methodNames = GetType().GetMethods(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Select(x => x.Name).ToArray();
 		foreach (State state in Enum.GetValues(typeof(State)))
@@ -37,10 +44,18 @@ public class EnemyRotatorStateMachine : MonoBehaviour
 		StartCoroutine(m_stateFunctionNames[m_state]);
 	}
 
+	public override void TakeHit()
+	{
+		m_dead = true;
+		GetComponent<BoxCollider2D>().enabled = false;
+	}
+
 	private IEnumerator SpawnState()
 	{
-		float randomAngle = Mathf.Deg2Rad * UnityEngine.Random.Range(-45f, 45f);
-		transform.position = GlobalConstants.MAP_RADIUS * new Vector3(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle), 0f);
+		float angle = UnityEngine.Random.Range(0f, 2 * Mathf.PI);
+		float randomDistance = UnityEngine.Random.Range(-0.2f * GlobalConstants.MAP_RADIUS, 0.2f * GlobalConstants.MAP_RADIUS);
+		transform.position = (0.5f * GlobalConstants.MAP_RADIUS + randomDistance) * new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
+		m_rotationDirection = UnityEngine.Random.Range(0f, 1f) > 0.5f ? 1 : -1;
 		yield return null;
 		m_state = State.Rotate;
 		NextState();
@@ -48,6 +63,26 @@ public class EnemyRotatorStateMachine : MonoBehaviour
 
 	private IEnumerator RotateState()
 	{
+		// Play animation
+		GetComponent<Animator>().Play(RUN_ANIMATION);
+
+		do
+		{
+			yield return null;
+			transform.RotateAround(GlobalConstants.ROTATION_POINT, GlobalConstants.ROTATION_AXIS, m_rotationDirection * m_angularVelocity * Time.deltaTime);
+			transform.rotation = Quaternion.identity;
+
+			// State transitions
+			if (m_dead)
+				m_state = State.Death;
+
+		} while (m_state == State.Rotate);
+		NextState();
+	}
+
+	private IEnumerator DeathState()
+	{
 		yield return null;
+		Destroy(gameObject);
 	}
 }

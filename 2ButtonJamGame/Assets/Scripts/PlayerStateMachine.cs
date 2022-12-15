@@ -15,12 +15,14 @@ public class PlayerStateMachine : MonoBehaviour
 		Dash
 	}
 
+	public Action PowerupChargesChanged;
+	public const int MAX_POWERUPS = 3;
+	public int PowerupCharges { get; private set; } = 0;
+
 	private const float LANCE_DISTANCE = 0.75f;
 	private const float LANCE_DAMAGE_ARC = 45f;
 	private const float INVINSIBILITY_FRAMES = 2f;
 	private const float DRAG = 1.2f;
-	private readonly Vector3 ROTATION_POINT = Vector3.zero;
-	private readonly Vector3 ROTATION_AXIS = new Vector3(0f, 0f, 1f);
 	private readonly int RUN_ANIMATION_EAST = Animator.StringToHash("PlayerAnimationRunEast");
 	private readonly int RUN_ANIMATION_WEST = Animator.StringToHash("PlayerAnimationRunWest");
 	private readonly int RUN_ANIMATION_NORTH = Animator.StringToHash("PlayerAnimationRunNorth");
@@ -30,12 +32,11 @@ public class PlayerStateMachine : MonoBehaviour
 	private KeyCode m_leftKey = KeyCode.LeftArrow;
 	private KeyCode m_rightKey = KeyCode.RightArrow;
 
-	[SerializeField] GameObject m_playerGraphics;
-	[SerializeField] GameObject m_lanceGraphics;
+	[SerializeField] private GameObject m_playerGraphics;
+	[SerializeField] private GameObject m_lanceGraphics;
 	[SerializeField] private float m_maxAngularSpeed = 20f;
 	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
-	[SerializeField] private float m_dashSteeringStregth = 20f;
 	private Animator m_animator;
 	private float m_angularVelocity = 0f;
 	private State m_state;
@@ -133,9 +134,17 @@ public class PlayerStateMachine : MonoBehaviour
 			case PickupType.Score:
 				break;
 			case PickupType.PowerupCharge:
+				Debug.Log(PowerupCharges);
+				Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
+				PowerupChargesChanged?.Invoke();
 				break;
 			case PickupType.Powerup:
-				SetLance(true);
+				if (PowerupCharges > 0)
+				{
+					PowerupCharges = 0;
+					PowerupChargesChanged?.Invoke();
+					SetLance(true);
+				}
 				break;
 		}
 	}
@@ -202,7 +211,7 @@ public class PlayerStateMachine : MonoBehaviour
 				moveDirection += 1;
 			m_angularVelocity += Time.deltaTime * (m_angularAcceleration * moveDirection - DRAG * m_angularVelocity);
 			m_angularVelocity = Mathf.Clamp(m_angularVelocity, -m_maxAngularSpeed, m_maxAngularSpeed);
-			transform.RotateAround(ROTATION_POINT, ROTATION_AXIS, m_angularVelocity * Time.deltaTime);
+			transform.RotateAround(GlobalConstants.ROTATION_POINT, GlobalConstants.ROTATION_AXIS, m_angularVelocity * Time.deltaTime);
 			transform.rotation = Quaternion.identity;
 
 			// Handle going into dashing

@@ -16,8 +16,6 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 	}
 
 	private readonly int RUN_ANIMATION = Animator.StringToHash("ChaserAnimationRun");
-	private readonly Vector3 ROTATION_POINT = Vector3.zero;
-	private readonly Vector3 ROTATION_AXIS = new Vector3(0f, 0f, 1f);
 
 	[SerializeField] private float m_maxAngularSpeed = 5f;
 	[SerializeField] private float m_angularAcceleration = 10f;
@@ -26,6 +24,7 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 	private Animator m_animator;
 	private float m_currentAngularSpeed = 0f;
 	private State m_state;
+	private bool m_dead = false;
 
 	private void Start()
 	{
@@ -50,7 +49,8 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 
 	public override void TakeHit()
 	{
-		m_state = State.Death;
+		m_dead = true;
+		GetComponent<BoxCollider2D>().enabled = false;
 	}
 
 	private void NextState()
@@ -69,12 +69,12 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 
 	private IEnumerator RunState()
 	{
+		// Play animation
+		m_animator.Play(RUN_ANIMATION);
+
 		do
 		{
 			yield return null;
-
-			// Play animation
-			m_animator.Play(RUN_ANIMATION);
 
 			// Handle movement
 			float moveDirection = Vector3.Cross(transform.position, m_playerTransform.position).z;
@@ -84,8 +84,12 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 				moveDirection /= Mathf.Abs(moveDirection);
 			m_currentAngularSpeed += Time.deltaTime * m_angularAcceleration * moveDirection;
 			m_currentAngularSpeed = Mathf.Clamp(m_currentAngularSpeed, -m_maxAngularSpeed, m_maxAngularSpeed);
-			transform.RotateAround(ROTATION_POINT, ROTATION_AXIS, m_currentAngularSpeed * Time.deltaTime);
+			transform.RotateAround(GlobalConstants.ROTATION_POINT, GlobalConstants.ROTATION_AXIS, m_currentAngularSpeed * Time.deltaTime);
 			transform.rotation = Quaternion.identity;
+
+			// State transitions
+			if (m_dead)
+				m_state = State.Death;
 
 		} while (m_state == State.Run);
 		NextState();
@@ -93,7 +97,6 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 
 	private IEnumerator DeathState()
 	{
-		gameObject.SetActive(false);
 		yield return null;
 		Destroy(gameObject);
 	}
