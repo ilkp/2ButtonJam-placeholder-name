@@ -4,29 +4,34 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class EnemyChaserStateMachine : MonoBehaviour
+[DisallowMultipleComponent]
+[RequireComponent(typeof(Animator))]
+public class EnemyChaserStateMachine : EnemyStateMachine
 {
 	private enum State
 	{
 		Spawn,
 		Run,
-		Dash
+		Death
 	}
 
+	private readonly int RUN_ANIMATION = Animator.StringToHash("ChaserAnimationRun");
 	private readonly Vector3 ROTATION_POINT = Vector3.zero;
 	private readonly Vector3 ROTATION_AXIS = new Vector3(0f, 0f, 1f);
 
 	[SerializeField] private float m_maxAngularSpeed = 5f;
 	[SerializeField] private float m_angularAcceleration = 10f;
-	[SerializeField] private float m_dashSpeed = 20f;
-	private float m_currentAngularSpeed = 0f;
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
-	private State m_state;
 	private Transform m_playerTransform;
+	private Animator m_animator;
+	private float m_currentAngularSpeed = 0f;
+	private State m_state;
 
 	private void Start()
 	{
+		gameObject.tag = "Enemy";
 		m_playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+		m_animator = GetComponent<Animator>();
 		// We add states and corresponding function names into dictionary for easy access
 		string[] methodNames = GetType().GetMethods(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Select(x => x.Name).ToArray();
 		foreach (State state in Enum.GetValues(typeof(State)))
@@ -41,6 +46,11 @@ public class EnemyChaserStateMachine : MonoBehaviour
 		}
 		m_state = State.Spawn;
 		NextState();
+	}
+
+	public override void TakeHit()
+	{
+		m_state = State.Death;
 	}
 
 	private void NextState()
@@ -62,31 +72,29 @@ public class EnemyChaserStateMachine : MonoBehaviour
 		do
 		{
 			yield return null;
-			float direction = Vector3.Cross(transform.position, m_playerTransform.position).z;
-			if (direction == 0f)
-				direction = 1f;
+
+			// Play animation
+			m_animator.Play(RUN_ANIMATION);
+
+			// Handle movement
+			float moveDirection = Vector3.Cross(transform.position, m_playerTransform.position).z;
+			if (moveDirection == 0f)
+				moveDirection = 1f;
 			else
-				direction /= Mathf.Abs(direction);
-			m_currentAngularSpeed += Time.deltaTime * m_angularAcceleration * direction;
+				moveDirection /= Mathf.Abs(moveDirection);
+			m_currentAngularSpeed += Time.deltaTime * m_angularAcceleration * moveDirection;
 			m_currentAngularSpeed = Mathf.Clamp(m_currentAngularSpeed, -m_maxAngularSpeed, m_maxAngularSpeed);
 			transform.RotateAround(ROTATION_POINT, ROTATION_AXIS, m_currentAngularSpeed * Time.deltaTime);
+			transform.rotation = Quaternion.identity;
+
 		} while (m_state == State.Run);
 		NextState();
 	}
 
-	private IEnumerator DashState()
+	private IEnumerator DeathState()
 	{
-		Vector3 dashDirection = -transform.position.normalized;
-		do
-		{
-			yield return null;
-			transform.Translate(m_dashSpeed * Time.deltaTime * dashDirection, Space.World);
-			if (transform.position.magnitude > GlobalConstants.MAP_RADIUS)
-			{
-				transform.position = transform.position.normalized * GlobalConstants.MAP_RADIUS;
-				m_state = State.Run;
-			}
-		} while (m_state == State.Dash);
-		NextState();
+		gameObject.SetActive(false);
+		yield return null;
+		Destroy(gameObject);
 	}
 }
