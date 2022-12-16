@@ -25,7 +25,6 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 	private Animator m_animator;
 	private float m_currentAngularSpeed = 0f;
 	private State m_state;
-	private bool m_dead = false;
 
 	private void Start()
 	{
@@ -48,12 +47,6 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 		NextState();
 	}
 
-	public override void TakeHit()
-	{
-		m_dead = true;
-		GetComponent<BoxCollider2D>().enabled = false;
-	}
-
 	private void NextState()
 	{
 		StartCoroutine(m_stateFunctionNames[m_state]);
@@ -61,6 +54,7 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 
 	private IEnumerator SpawnState()
 	{
+		m_dead = false;
 		float randomAngle = Mathf.Deg2Rad * UnityEngine.Random.Range(-45f, 45f);
 		transform.position = GlobalConstants.MAP_RADIUS * new Vector3(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle), 0f);
 		yield return null;

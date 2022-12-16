@@ -21,6 +21,7 @@ public class PlayerStateMachine : MonoBehaviour
 	public const int MAX_HP = 3;
 	public int PowerupCharges { get; private set; } = 0;
 	public int Hp { get; private set; } = MAX_HP;
+	public int Score { get; private set; } = 0;
 
 	private const float LANCE_DISTANCE = 0.75f;
 	private const float LANCE_DAMAGE_ARC = 45f;
@@ -40,7 +41,6 @@ public class PlayerStateMachine : MonoBehaviour
 	[SerializeField] private float m_maxAngularSpeed = 20f;
 	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
-	private int m_score = 0;
 	private bool m_dead = false;
 	private Animator m_animator;
 	private float m_angularVelocity = 0f;
@@ -90,8 +90,8 @@ public class PlayerStateMachine : MonoBehaviour
 	{
 		if (collision.CompareTag("Enemy"))
 		{
-			Vector3 prevPositionToCurrent = transform.position - m_previousFramePosition;
-			if (m_haveLance && prevPositionToCurrent.magnitude > 0f && Vector3.Angle(prevPositionToCurrent, collision.transform.position - transform.position) <= LANCE_DAMAGE_ARC)
+			//Vector3 prevPositionToCurrent = transform.position - m_previousFramePosition;
+			if (m_haveLance)// && prevPositionToCurrent.magnitude > 0f && Vector3.Angle(prevPositionToCurrent, collision.transform.position - transform.position) <= LANCE_DAMAGE_ARC)
 			{
 				collision.GetComponent<EnemyStateMachine>().TakeHit();
 				SetLance(false);
@@ -148,22 +148,24 @@ public class PlayerStateMachine : MonoBehaviour
 	{
 		switch (type)
 		{
+			case PickupType.Life:
+				Mathf.Clamp(++Hp, 0, MAX_HP);
+				break;
 			case PickupType.Score:
-				m_score += 100;
+				Score += 100;
 				break;
 			case PickupType.PowerupCharge:
 				Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
-				UIChanged?.Invoke();
 				break;
 			case PickupType.Powerup:
 				if (PowerupCharges > 0)
 				{
 					PowerupCharges = 0;
-					UIChanged?.Invoke();
 					SetLance(true);
 				}
 				break;
 		}
+		UIChanged?.Invoke();
 	}
 
 	private void NextState()
@@ -180,7 +182,7 @@ public class PlayerStateMachine : MonoBehaviour
 		PowerupCharges = 0;
 		UIChanged?.Invoke();
 		m_angularVelocity = 0;
-		m_score = 0;
+		Score = 0;
 		yield return null;
 		m_state = State.Run;
 		NextState();

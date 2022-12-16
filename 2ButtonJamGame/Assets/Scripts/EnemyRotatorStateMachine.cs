@@ -20,7 +20,6 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 	private State m_state;
 	private int m_rotationDirection;
 	private float m_angularVelocity = 20f;
-	private bool m_dead = false;
 
 	private void Start()
 	{
@@ -45,14 +44,9 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 		StartCoroutine(m_stateFunctionNames[m_state]);
 	}
 
-	public override void TakeHit()
-	{
-		m_dead = true;
-		GetComponent<BoxCollider2D>().enabled = false;
-	}
-
 	private IEnumerator SpawnState()
 	{
+		m_dead = false;
 		float angle = UnityEngine.Random.Range(0f, 2 * Mathf.PI);
 		float randomDistance = UnityEngine.Random.Range(-0.2f * GlobalConstants.MAP_RADIUS, 0.2f * GlobalConstants.MAP_RADIUS);
 		transform.position = (0.5f * GlobalConstants.MAP_RADIUS + randomDistance) * new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);

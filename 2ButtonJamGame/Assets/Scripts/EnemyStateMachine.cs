@@ -1,7 +1,13 @@
 
 using UnityEngine;
 
-public abstract class EnemyStateMachine : MonoBehaviour
+[RequireComponent(typeof(BoxCollider2D))]
+public class EnemyStateMachine : MonoBehaviour
 {
-	public abstract void TakeHit();
+	protected bool m_dead = false;
+	public void TakeHit()
+	{
+		m_dead = true;
+		GetComponent<BoxCollider2D>().enabled = false;
+	}
 }

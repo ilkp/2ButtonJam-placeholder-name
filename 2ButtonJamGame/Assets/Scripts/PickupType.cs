@@ -3,5 +3,6 @@ public enum PickupType
 {
 	Score,
 	Powerup,
-	PowerupCharge
+	PowerupCharge,
+	Life
 }
