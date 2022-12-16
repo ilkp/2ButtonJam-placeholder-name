@@ -71,8 +71,7 @@ public class PlayerStateMachine : MonoBehaviour
 			}
 			m_stateFunctionNames.Add(state, methodName);
 		}
-		m_state = State.Spawn;
-		NextState();
+		Restart();
 	}
 
 	private void Update()
@@ -101,6 +100,12 @@ public class PlayerStateMachine : MonoBehaviour
 				TakeHit();
 			}
 		}
+	}
+
+	public void Restart()
+	{
+		m_state = State.Spawn;
+		NextState();
 	}
 
 	private void TakeHit()
@@ -175,14 +180,15 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator SpawnState()
 	{
+		m_playerGraphics.SetActive(true);
 		SetLance(false);
 		transform.position = new Vector3(-GlobalConstants.MAP_RADIUS, 0f, 0f);
 		m_dead = false;
+		m_angularVelocity = 0;
 		Hp = MAX_HP;
 		PowerupCharges = 0;
-		UIChanged?.Invoke();
-		m_angularVelocity = 0;
 		Score = 0;
+		UIChanged?.Invoke();
 		yield return null;
 		m_state = State.Run;
 		NextState();
@@ -275,6 +281,8 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator DeathState()
 	{
+		m_playerGraphics.SetActive(false);
 		yield return null;
+		UI.Instance.ActivateButtons();
 	}
 }

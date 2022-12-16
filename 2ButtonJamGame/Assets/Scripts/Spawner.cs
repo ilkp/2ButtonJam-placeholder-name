@@ -18,22 +18,6 @@ public class Spawner : MonoBehaviour
 	private Dictionary<PickupType, SpawnableData> m_pickups;
 	private Dictionary<EnemyType, SpawnableData> m_enemies;
 
-	public bool RemovePickup(PickupType type)
-	{
-		if (m_pickups[type].nAlive <= 0)
-			return false;
-		--m_pickups[type].nAlive;
-		return true;
-	}
-
-	public bool RemoveEnemy(EnemyType type)
-	{
-		if (m_enemies[type].nAlive <= 0)
-			return false;
-		--m_enemies[type].nAlive;
-		return true;
-	}
-
 	private void Awake()
 	{
 		if (Instance != null)
@@ -43,18 +27,7 @@ public class Spawner : MonoBehaviour
 
 	private void Start()
 	{
-		m_pickups = new Dictionary<PickupType, SpawnableData>
-		{
-			{ PickupType.Score, new() { maxAlive = 1, spawnTime = 5f, prefab = (GameObject)Resources.Load("Prefabs/ScorePickupPrefab") } },
-			{ PickupType.Powerup, new() { maxAlive = 1, spawnTime = 15f, prefab = (GameObject)Resources.Load("Prefabs/PowerupPickupPrefab") } },
-			{ PickupType.PowerupCharge, new() { maxAlive = 1, spawnTime = 5f, prefab = (GameObject)Resources.Load("Prefabs/PowerupChargePickupPrefab") } }
-		};
-
-		m_enemies = new Dictionary<EnemyType, SpawnableData>
-		{
-			{ EnemyType.Chaser, new() { maxAlive = 1, spawnTime = 7.5f, prefab = (GameObject)Resources.Load("Prefabs/EnemyChaser") } },
-			{ EnemyType.Rotator, new() { maxAlive = 2, spawnTime = 15f, prefab = (GameObject)Resources.Load("Prefabs/EnemyRotator") } }
-		};
+		Restart();
 	}
 
 	private void Update()
@@ -91,5 +64,37 @@ public class Spawner : MonoBehaviour
 				enemy.spawnTimer += Time.deltaTime;
 			}
 		}
+	}
+
+	public void Restart()
+	{
+		m_pickups = new Dictionary<PickupType, SpawnableData>
+		{
+			{ PickupType.Score, new() { maxAlive = 1, spawnTime = 5f, prefab = (GameObject)Resources.Load("Prefabs/ScorePickupPrefab") } },
+			{ PickupType.Powerup, new() { maxAlive = 1, spawnTime = 15f, prefab = (GameObject)Resources.Load("Prefabs/PowerupPickupPrefab") } },
+			{ PickupType.PowerupCharge, new() { maxAlive = 1, spawnTime = 5f, prefab = (GameObject)Resources.Load("Prefabs/PowerupChargePickupPrefab") } }
+		};
+
+		m_enemies = new Dictionary<EnemyType, SpawnableData>
+		{
+			{ EnemyType.Chaser, new() { maxAlive = 1, spawnTime = 7.5f, prefab = (GameObject)Resources.Load("Prefabs/EnemyChaser") } },
+			{ EnemyType.Rotator, new() { maxAlive = 2, spawnTime = 15f, prefab = (GameObject)Resources.Load("Prefabs/EnemyRotator") } }
+		};
+	}
+
+	public bool RemovePickup(PickupType type)
+	{
+		if (m_pickups[type].nAlive <= 0)
+			return false;
+		--m_pickups[type].nAlive;
+		return true;
+	}
+
+	public bool RemoveEnemy(EnemyType type)
+	{
+		if (m_enemies[type].nAlive <= 0)
+			return false;
+		--m_enemies[type].nAlive;
+		return true;
 	}
 }

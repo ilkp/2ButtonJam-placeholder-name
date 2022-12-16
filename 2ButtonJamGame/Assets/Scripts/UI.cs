@@ -2,9 +2,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
+using System.Linq;
 
 public class UI : MonoBehaviour
 {
+	public static UI Instance { get; private set; }
+	[SerializeField] private GameObject m_gameOverMenu;
 	[SerializeField] private PlayerStateMachine m_player;
 	[SerializeField] private TMP_Text m_scoreText;
 	[SerializeField] private Image[] m_powerupUI;
@@ -13,6 +17,60 @@ public class UI : MonoBehaviour
     [SerializeField] private Sprite m_powerupFilled;
 	[SerializeField] private Sprite m_hpEmpty;
 	[SerializeField] private Sprite m_hpFilled;
+	private bool m_buttonsActive = false;
+
+	private void Awake()
+	{
+		if (Instance != null)
+			Destroy(gameObject);
+		Instance = this;
+		m_gameOverMenu.SetActive(false);
+	}
+
+	private void Update()
+	{
+		if (m_buttonsActive)
+		{
+			if (Input.GetKeyDown(KeyCode.RightArrow))
+			{
+				GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+				GameObject[] pickups = GameObject.FindGameObjectsWithTag("Pickup");
+				for (int i = 0; i < enemies.Length; ++i)
+					Destroy(enemies[i]);
+				for (int i = 0; i < pickups.Length; ++i)
+					Destroy(pickups[i]);
+				FindObjectOfType<PlayerStateMachine>().Restart();
+				FindObjectOfType<Spawner>().Restart();
+				m_gameOverMenu.SetActive(false);
+				m_buttonsActive = false;
+			}
+			if (Input.GetKeyDown(KeyCode.LeftArrow))
+			{
+#if UNITY_EDITOR
+				UnityEditor.EditorApplication.isPlaying = false;
+#else
+				Application.Quit();
+#endif
+			}
+		}
+	}
+
+	public void ActivateButtons()
+	{
+		StartCoroutine(ActivateButtonsDelay());
+	}
+
+	private IEnumerator ActivateButtonsDelay()
+	{
+		float timer = 0f;
+		while (timer < 1f)
+		{
+			timer += Time.deltaTime;
+			yield return null;
+		}
+		m_gameOverMenu.SetActive(true);
+		m_buttonsActive = true;
+	}
 
 	private void OnEnable()
     {
