@@ -15,7 +15,7 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 	}
 
 	private const EnemyType m_type = EnemyType.Rotator;
-	private readonly int RUN_ANIMATION = Animator.StringToHash("ChaserAnimationRun");
+	private readonly int RUN_ANIMATION = Animator.StringToHash("RotatorAnimation");
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
 	private State m_state;
 	private int m_rotationDirection;

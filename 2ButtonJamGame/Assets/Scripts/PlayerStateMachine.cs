@@ -12,12 +12,15 @@ public class PlayerStateMachine : MonoBehaviour
 	{
 		Spawn,
 		Run,
-		Dash
+		Dash,
+		Death
 	}
 
-	public Action PowerupChargesChanged;
+	public Action UIChanged;
 	public const int MAX_POWERUPS = 3;
+	public const int MAX_HP = 3;
 	public int PowerupCharges { get; private set; } = 0;
+	public int Hp { get; private set; } = MAX_HP;
 
 	private const float LANCE_DISTANCE = 0.75f;
 	private const float LANCE_DAMAGE_ARC = 45f;
@@ -37,6 +40,8 @@ public class PlayerStateMachine : MonoBehaviour
 	[SerializeField] private float m_maxAngularSpeed = 20f;
 	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
+	private int m_score = 0;
+	private bool m_dead = false;
 	private Animator m_animator;
 	private float m_angularVelocity = 0f;
 	private State m_state;
@@ -53,7 +58,6 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private void Start()
 	{
-		SetLance(false);
 		m_animator = GetComponent<Animator>();
 		// We add states and corresponding function names into dictionary for easy access
 		string[] methodNames = GetType().GetMethods(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Select(x => x.Name).ToArray();
@@ -78,25 +82,38 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private void OnTriggerStay2D(Collider2D collision)
 	{
-		if (collision.CompareTag("Enemy") && !m_isInvinsible)
+		if (collision.CompareTag("Enemy"))
 			TakeHit();
 	}
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
-		if (collision.CompareTag("Enemy") && m_haveLance)
+		if (collision.CompareTag("Enemy"))
 		{
 			Vector3 prevPositionToCurrent = transform.position - m_previousFramePosition;
-			if (prevPositionToCurrent.magnitude > 0f && Vector3.Angle(prevPositionToCurrent, collision.transform.position - transform.position) <= LANCE_DAMAGE_ARC)
+			if (m_haveLance && prevPositionToCurrent.magnitude > 0f && Vector3.Angle(prevPositionToCurrent, collision.transform.position - transform.position) <= LANCE_DAMAGE_ARC)
 			{
 				collision.GetComponent<EnemyStateMachine>().TakeHit();
 				SetLance(false);
+			}
+			else
+			{
+				TakeHit();
 			}
 		}
 	}
 
 	private void TakeHit()
 	{
+		if (m_isInvinsible)
+			return;
+		--Hp;
+		UIChanged?.Invoke();
+		if (Hp <= 0)
+		{
+			m_dead = true;
+			return;
+		}
 		StartCoroutine(InvinsibilityFrames());
 	}
 
@@ -132,16 +149,17 @@ public class PlayerStateMachine : MonoBehaviour
 		switch (type)
 		{
 			case PickupType.Score:
+				m_score += 100;
 				break;
 			case PickupType.PowerupCharge:
 				Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
-				PowerupChargesChanged?.Invoke();
+				UIChanged?.Invoke();
 				break;
 			case PickupType.Powerup:
 				if (PowerupCharges > 0)
 				{
 					PowerupCharges = 0;
-					PowerupChargesChanged?.Invoke();
+					UIChanged?.Invoke();
 					SetLance(true);
 				}
 				break;
@@ -155,7 +173,14 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator SpawnState()
 	{
+		SetLance(false);
 		transform.position = new Vector3(-GlobalConstants.MAP_RADIUS, 0f, 0f);
+		m_dead = false;
+		Hp = MAX_HP;
+		PowerupCharges = 0;
+		UIChanged?.Invoke();
+		m_angularVelocity = 0;
+		m_score = 0;
 		yield return null;
 		m_state = State.Run;
 		NextState();
@@ -163,8 +188,9 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator RunState()
 	{
-		float timer = 0f;
+		float dashTimer = 0f;
 		m_angularVelocity = 0f;
+		transform.position = transform.position.normalized * GlobalConstants.MAP_RADIUS;
 		do
 		{
 			yield return null;
@@ -212,13 +238,15 @@ public class PlayerStateMachine : MonoBehaviour
 			m_angularVelocity = Mathf.Clamp(m_angularVelocity, -m_maxAngularSpeed, m_maxAngularSpeed);
 			transform.RotateAround(GlobalConstants.ROTATION_POINT, GlobalConstants.ROTATION_AXIS, m_angularVelocity * Time.deltaTime);
 			transform.rotation = Quaternion.identity;
-
-			// Handle going into dashing
 			if (Input.GetKey(m_leftKey) && Input.GetKey(m_rightKey))
-				timer += Time.deltaTime;
+				dashTimer += Time.deltaTime;
 			else
-				timer = 0f;
-			if (timer >= 0.1f)
+				dashTimer = 0f;
+
+			// State transitions
+			if (m_dead)
+				m_state = State.Death;
+			else if (dashTimer >= 0.1f)
 				m_state = State.Dash;
 
 		} while (m_state == State.Run);
@@ -232,12 +260,19 @@ public class PlayerStateMachine : MonoBehaviour
 		{
 			yield return null;
 			transform.Translate(m_dashSpeed * Time.deltaTime * dashDirection, Space.World);
-			if (transform.position.magnitude > GlobalConstants.MAP_RADIUS)
+
+			// State transitions
+			if (m_dead)
+				m_state = State.Death;
+			else if (transform.position.magnitude > GlobalConstants.MAP_RADIUS)
 				m_state = State.Run;
 
 		} while (m_state == State.Dash);
-
-		transform.position = transform.position.normalized * GlobalConstants.MAP_RADIUS;
 		NextState();
+	}
+
+	private IEnumerator DeathState()
+	{
+		yield return null;
 	}
 }
