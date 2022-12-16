@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 480a755385ee96e4794eadd874d21baf
+guid: fe0eb95879dd615408e4d4ea5135e033
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -70,7 +70,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -106,7 +106,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -117,13 +117,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: powerup_ui_0
+      name: gameover_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 32
-        height: 32
+        width: 128
+        height: 96
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -131,20 +131,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: de1534ec6b2c2784f94015d107a803d6
-      internalID: -1996361396
+      spriteID: 56a692922adfe184481b846c8b631755
+      internalID: -117260545
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: powerup_ui_1
+      name: gameover_1
       rect:
         serializedVersion: 2
-        x: 32
+        x: 128
         y: 0
-        width: 32
-        height: 32
+        width: 128
+        height: 96
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -152,8 +152,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d86cb0a89feaea641a3b680daec5f5a6
-      internalID: 1906158487
+      spriteID: 1224b9ec68db04e40ac9f8e7aa6c2423
+      internalID: -1136117655
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: gameover_2
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 128
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6380c0d691ccbe543ab23073c8f0832b
+      internalID: 1894840820
       vertices: []
       indices: 
       edges: []
@@ -161,7 +182,7 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: b4ac07498e777b24a945fffb1775423b
+    spriteID: 79114e64b7229ee46a1fcb43ecf36509
     internalID: 0
     vertices: []
     indices: 
@@ -169,8 +190,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      powerup_ui_0: -1996361396
-      powerup_ui_1: 1906158487
+      gameover_1: -1136117655
+      gameover_0: -117260545
+      gameover_2: 1894840820
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 480a755385ee96e4794eadd874d21baf
+guid: 1371dfeddd5b9a14cb9113cba8603fa7
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -36,9 +36,9 @@ TextureImporter:
     filterMode: 0
     aniso: 1
     mipBias: 0
-    wrapU: 1
-    wrapV: 1
-    wrapW: 1
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
@@ -106,7 +106,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -117,7 +117,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: powerup_ui_0
+      name: health_ui_0
       rect:
         serializedVersion: 2
         x: 0
@@ -131,14 +131,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: de1534ec6b2c2784f94015d107a803d6
-      internalID: -1996361396
+      spriteID: 1665b81ea80bfa142abc4a5b4e0bdd2d
+      internalID: 400161441
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: powerup_ui_1
+      name: health_ui_1
       rect:
         serializedVersion: 2
         x: 32
@@ -152,8 +152,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: d86cb0a89feaea641a3b680daec5f5a6
-      internalID: 1906158487
+      spriteID: 58ef1c19e7fb17a4e8674be44359bde6
+      internalID: -972867155
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: b4ac07498e777b24a945fffb1775423b
+    spriteID: abb2f2dc8d49911489cbe6cd9f90cc31
     internalID: 0
     vertices: []
     indices: 
@@ -169,8 +169,8 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      powerup_ui_0: -1996361396
-      powerup_ui_1: 1906158487
+      health_ui_0: 400161441
+      health_ui_1: -972867155
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
