@@ -33,6 +33,7 @@ public class UI : MonoBehaviour
 		{
 			if (Input.GetKeyDown(KeyCode.RightArrow))
 			{
+				// Restart game
 				GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
 				GameObject[] pickups = GameObject.FindGameObjectsWithTag("Pickup");
 				for (int i = 0; i < enemies.Length; ++i)
@@ -41,6 +42,7 @@ public class UI : MonoBehaviour
 					Destroy(pickups[i]);
 				FindObjectOfType<PlayerStateMachine>().Restart();
 				FindObjectOfType<Spawner>().Restart();
+				FindObjectOfType<DifficultyTimer>().Restart();
 				m_gameOverMenu.SetActive(false);
 				m_buttonsActive = false;
 			}

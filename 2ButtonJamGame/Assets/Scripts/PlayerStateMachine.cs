@@ -23,6 +23,7 @@ public class PlayerStateMachine : MonoBehaviour
 	public int Hp { get; private set; } = MAX_HP;
 	public int Score { get; private set; } = 0;
 
+	private const float GOD_MODE_TIME = 10f;
 	private const float LANCE_DISTANCE = 0.75f;
 	private const float LANCE_DAMAGE_ARC = 45f;
 	private const float INVINSIBILITY_FRAMES = 2f;
@@ -41,14 +42,16 @@ public class PlayerStateMachine : MonoBehaviour
 	[SerializeField] private float m_maxAngularSpeed = 20f;
 	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
+	private float m_godModeTimer = 0f;
 	private bool m_dead = false;
 	private Animator m_animator;
 	private float m_angularVelocity = 0f;
 	private State m_state;
-	private bool m_isInvinsible = false;
+	private bool m_haveInvinsibilityFrames = false;
 
 	private Vector3 m_previousFramePosition;
-	private bool m_haveLance = true;
+	private bool m_haveLance = false;
+	private bool m_haveGodMode = false;
 
 
 	private void Awake()
@@ -90,10 +93,11 @@ public class PlayerStateMachine : MonoBehaviour
 		if (collision.CompareTag("Enemy"))
 		{
 			//Vector3 prevPositionToCurrent = transform.position - m_previousFramePosition;
-			if (m_haveLance)// && prevPositionToCurrent.magnitude > 0f && Vector3.Angle(prevPositionToCurrent, collision.transform.position - transform.position) <= LANCE_DAMAGE_ARC)
+			if (m_haveLance || m_haveGodMode)// && prevPositionToCurrent.magnitude > 0f && Vector3.Angle(prevPositionToCurrent, collision.transform.position - transform.position) <= LANCE_DAMAGE_ARC)
 			{
 				collision.GetComponent<EnemyStateMachine>().TakeHit();
-				SetLance(false);
+				if (!m_haveGodMode)
+					SetLance(false);
 			}
 			else
 			{
@@ -110,7 +114,7 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private void TakeHit()
 	{
-		if (m_isInvinsible)
+		if (m_haveInvinsibilityFrames || m_haveGodMode)
 			return;
 		--Hp;
 		UIChanged?.Invoke();
@@ -124,7 +128,7 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator InvinsibilityFrames()
 	{
-		m_isInvinsible = true;
+		m_haveInvinsibilityFrames = true;
 		float timer = 0f;
 		float timerB = 0f;
 		m_playerGraphics.SetActive(false);
@@ -140,7 +144,27 @@ public class PlayerStateMachine : MonoBehaviour
 			yield return null;
 		}
 		m_playerGraphics.SetActive(true);
-		m_isInvinsible = false;
+		m_haveInvinsibilityFrames = false;
+	}
+
+	private void StartGodMode()
+	{
+		m_godModeTimer = GOD_MODE_TIME;
+		if (!m_haveGodMode)
+			StartCoroutine(GodMode());
+	}
+
+	private IEnumerator GodMode()
+	{
+		m_haveGodMode = true;
+		m_playerGraphics.GetComponent<SpriteRenderer>().color = new Color(250f, 0f, 250f, 250f);
+		while (m_godModeTimer > 0f)
+		{
+			m_godModeTimer -= Time.deltaTime;
+			yield return null;
+		}
+		m_playerGraphics.GetComponent<SpriteRenderer>().color = new Color(255f, 255f, 255f, 250f);
+		m_haveGodMode = false;
 	}
 	
 	private void SetLance(bool set)
@@ -149,21 +173,38 @@ public class PlayerStateMachine : MonoBehaviour
 		m_lanceGraphics.SetActive(set);
 	}
 
+	public void AddScore(int score)
+	{
+		Score += score;
+		UIChanged?.Invoke();
+	}
+
 	public void ReceivePickup(PickupType type)
 	{
 		switch (type)
 		{
 			case PickupType.Life:
-				Mathf.Clamp(++Hp, 0, MAX_HP);
+				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				break;
 			case PickupType.Score:
 				Score += 100;
 				break;
 			case PickupType.PowerupCharge:
-				Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
+				PowerupCharges = Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
 				break;
 			case PickupType.Powerup:
-				if (PowerupCharges > 0)
+				if (PowerupCharges == 3)
+				{
+					PowerupCharges = 0;
+					StartGodMode();
+					SetLance(true);
+				}
+				else if (PowerupCharges == 2)
+				{
+					PowerupCharges = 0;
+					StartGodMode();
+				}
+				else if (PowerupCharges == 1)
 				{
 					PowerupCharges = 0;
 					SetLance(true);

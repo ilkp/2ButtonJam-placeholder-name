@@ -32,6 +32,9 @@ public class Spawner : MonoBehaviour
 
 	private void Update()
 	{
+		m_enemies[EnemyType.Rotator].maxAlive = Mathf.Max(DifficultyTimer.Instance.DifficultyStage / 3, 1);
+		m_enemies[EnemyType.Chaser].maxAlive = Mathf.Max(DifficultyTimer.Instance.DifficultyStage / 5, 1);
+
 		// pickups
 		foreach (var pickup in m_pickups.Values)
 		{
@@ -70,15 +73,15 @@ public class Spawner : MonoBehaviour
 	{
 		m_pickups = new Dictionary<PickupType, SpawnableData>
 		{
-			{ PickupType.Score, new() { maxAlive = 1, spawnTime = 5f, prefab = (GameObject)Resources.Load("Prefabs/ScorePickupPrefab") } },
+			{ PickupType.Score, new() { maxAlive = 2, spawnTime = 10f, prefab = (GameObject)Resources.Load("Prefabs/ScorePickupPrefab") } },
 			{ PickupType.Powerup, new() { maxAlive = 1, spawnTime = 15f, prefab = (GameObject)Resources.Load("Prefabs/PowerupPickupPrefab") } },
-			{ PickupType.PowerupCharge, new() { maxAlive = 1, spawnTime = 5f, prefab = (GameObject)Resources.Load("Prefabs/PowerupChargePickupPrefab") } }
+			{ PickupType.PowerupCharge, new() { maxAlive = 1, spawnTime = 10f, prefab = (GameObject)Resources.Load("Prefabs/PowerupChargePickupPrefab") } }
 		};
 
 		m_enemies = new Dictionary<EnemyType, SpawnableData>
 		{
 			{ EnemyType.Chaser, new() { maxAlive = 1, spawnTime = 7.5f, prefab = (GameObject)Resources.Load("Prefabs/EnemyChaser") } },
-			{ EnemyType.Rotator, new() { maxAlive = 2, spawnTime = 15f, prefab = (GameObject)Resources.Load("Prefabs/EnemyRotator") } }
+			{ EnemyType.Rotator, new() { maxAlive = 2, spawnTime = 10f, prefab = (GameObject)Resources.Load("Prefabs/EnemyRotator") } }
 		};
 	}
 
