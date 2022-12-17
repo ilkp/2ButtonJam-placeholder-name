@@ -33,6 +33,7 @@ public class DifficultyTimer : MonoBehaviour
 		if (m_timer > m_step)
 		{
 			++DifficultyStage;
+			Debug.Log(DifficultyStage);
 			m_step *= 1.2f;
 			m_timer = 0f;
 		}

@@ -122,7 +122,8 @@ public class PlayerStateMachine : MonoBehaviour
 			}
 			m_stateFunctionNames.Add(state, methodName);
 		}
-		Restart();
+		m_state = State.Spawn;
+		NextState();
 	}
 
 	private void Update()
@@ -157,7 +158,6 @@ public class PlayerStateMachine : MonoBehaviour
 	public void Restart()
 	{
 		m_state = State.Spawn;
-		NextState();
 	}
 
 	private void TakeHit()
@@ -370,8 +370,31 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator DeathState()
 	{
-		m_playerGraphics.SetActive(false);
-		yield return null;
 		UI.Instance.ActivateButtons();
+		m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprite_n;
+		Vector3 rotate = new Vector3(0f, 0f, 120f);
+		float timer = 0f;
+		float maxTime = 2.5f;
+		do
+		{
+			if (timer < maxTime)
+			{
+				m_playerGraphics.transform.localPosition = Vector3.Lerp(Vector3.one, -transform.position, timer / maxTime);
+				m_playerGraphics.transform.Rotate(rotate * Time.deltaTime);
+				m_playerGraphics.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / maxTime);
+				timer += Time.deltaTime;
+			}
+			else
+			{
+				m_playerGraphics.SetActive(false);
+			}
+			yield return null;
+
+		} while (m_state == State.Death);
+		m_playerGraphics.transform.localPosition = Vector3.zero;
+		m_playerGraphics.transform.localScale = Vector3.one;
+		m_playerGraphics.transform.localRotation = Quaternion.identity;
+		m_playerGraphics.SetActive(true);
+		NextState();
 	}
 }
