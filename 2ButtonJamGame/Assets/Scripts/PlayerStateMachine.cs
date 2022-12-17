@@ -226,6 +226,7 @@ public class PlayerStateMachine : MonoBehaviour
 	{
 		Score += score;
 		UIChanged?.Invoke();
+		FindObjectOfType<UI>().HighlightScore();
 	}
 
 	public void ReceivePickup(PickupType type)
@@ -238,6 +239,7 @@ public class PlayerStateMachine : MonoBehaviour
 			case PickupType.Score:
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				Score += 100;
+				FindObjectOfType<UI>().HighlightScore();
 				break;
 			case PickupType.PowerupCharge:
 				PowerupCharges = Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);

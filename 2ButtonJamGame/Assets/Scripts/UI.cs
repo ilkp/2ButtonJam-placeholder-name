@@ -7,6 +7,8 @@ using System.Linq;
 
 public class UI : MonoBehaviour
 {
+	private const float SCORE_HIGHLIGHT_TIME = 0.5f;
+	private float m_scoreHighlightTimer = 0f;
 	public static UI Instance { get; private set; }
 	[SerializeField] private GameObject m_gameOverMenu;
 	[SerializeField] private PlayerStateMachine m_player;
@@ -18,6 +20,8 @@ public class UI : MonoBehaviour
 	[SerializeField] private Sprite m_hpEmpty;
 	[SerializeField] private Sprite m_hpFilled;
 	private bool m_buttonsActive = false;
+	private Vector3 m_scoreDefaultScale;
+	private Coroutine m_scoreHighlightCoroutine;
 
 	private void Awake()
 	{
@@ -25,6 +29,11 @@ public class UI : MonoBehaviour
 			Destroy(gameObject);
 		Instance = this;
 		m_gameOverMenu.SetActive(false);
+	}
+
+	private void Start()
+	{
+		m_scoreDefaultScale = m_scoreText.transform.localScale;
 	}
 
 	private void Update()
@@ -55,6 +64,24 @@ public class UI : MonoBehaviour
 #endif
 			}
 		}
+	}
+
+	public void HighlightScore()
+	{
+		m_scoreHighlightTimer = 0f;
+		if (m_scoreHighlightCoroutine == null)
+			StartCoroutine(HighlightScoreCoroutine());
+	}
+
+	private IEnumerator HighlightScoreCoroutine()
+	{
+		while (m_scoreHighlightTimer < SCORE_HIGHLIGHT_TIME)
+		{
+			m_scoreHighlightTimer += Time.deltaTime;
+			m_scoreText.transform.localScale = Vector3.Lerp(1.5f * m_scoreDefaultScale, m_scoreDefaultScale, m_scoreHighlightTimer / SCORE_HIGHLIGHT_TIME);
+			yield return null;
+		}
+		m_scoreText.transform.localScale = m_scoreDefaultScale;
 	}
 
 	public void ActivateButtons()
