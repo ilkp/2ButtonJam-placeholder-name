@@ -14,8 +14,6 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 		Death
 	}
 
-	public bool IsSpawning { get; private set; }
-	private const float SPAWN_FLASH_TIME = 1f;
 	private const EnemyType m_type = EnemyType.Rotator;
 	private readonly int RUN_ANIMATION = Animator.StringToHash("RotatorAnimation");
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();

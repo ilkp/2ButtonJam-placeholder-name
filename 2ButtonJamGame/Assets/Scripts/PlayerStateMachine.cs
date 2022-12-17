@@ -32,6 +32,9 @@ public class PlayerStateMachine : MonoBehaviour
 	private KeyCode m_leftKey = KeyCode.RightArrow;
 	private KeyCode m_rightKey = KeyCode.LeftArrow;
 
+	[SerializeField] private AudioClip m_powerupAudioClip;
+	[SerializeField] private AudioClip m_dashAudioClip;
+
 	[SerializeField] private Sprite m_playerSprite_n;
 	[SerializeField] private Sprite m_playerSprite_ne;
 	[SerializeField] private Sprite m_playerSprite_e;
@@ -242,6 +245,8 @@ public class PlayerStateMachine : MonoBehaviour
 				break;
 			case PickupType.PowerupCharge:
 				PowerupCharges = Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
+				if (AudioManager.Instance)
+					AudioManager.Instance.PlayClip(m_powerupAudioClip);
 				break;
 			case PickupType.Powerup:
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
