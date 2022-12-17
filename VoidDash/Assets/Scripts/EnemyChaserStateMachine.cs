@@ -98,7 +98,7 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 	private IEnumerator DeathState()
 	{
 		GetComponent<BoxCollider2D>().enabled = false;
-		GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerStateMachine>().AddScore(20);
+		GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerStateMachine>().AddScore(75);
 		Spawner.Instance.RemoveEnemy(m_type);
 		yield return null;
 		Destroy(gameObject);

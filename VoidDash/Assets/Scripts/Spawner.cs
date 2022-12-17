@@ -36,10 +36,14 @@ public class Spawner : MonoBehaviour
 		m_enemies[EnemyType.Chaser].maxAlive = Mathf.Max(DifficultyTimer.Instance.DifficultyStage / 5, 1);
 		if (DifficultyTimer.Instance.DifficultyStage > 5)
 		{
+			m_enemies[EnemyType.Rotator].spawnTime = 8f;
+			m_enemies[EnemyType.Chaser].spawnTime = 13f;
 			m_pickups[PickupType.Score].maxAlive = 2;
 		}
-		else if (DifficultyTimer.Instance.DifficultyStage > 10)
+		if (DifficultyTimer.Instance.DifficultyStage > 10)
 		{
+			m_enemies[EnemyType.Rotator].spawnTime = 7f;
+			m_enemies[EnemyType.Chaser].spawnTime = 12f;
 			m_pickups[PickupType.Score].maxAlive = 3;
 			m_pickups[PickupType.Score].maxAlive = 2;
 		}
