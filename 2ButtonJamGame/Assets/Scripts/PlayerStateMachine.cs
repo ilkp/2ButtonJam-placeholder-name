@@ -34,6 +34,9 @@ public class PlayerStateMachine : MonoBehaviour
 
 	[SerializeField] private AudioClip m_powerupAudioClip;
 	[SerializeField] private AudioClip m_dashAudioClip;
+	[SerializeField] private AudioClip m_getLanceAudioClip;
+	[SerializeField] private AudioClip m_hitHurtAudioClip;
+	[SerializeField] private AudioClip m_pickupScoreAudioClip;
 
 	[SerializeField] private Sprite m_playerSprite_n;
 	[SerializeField] private Sprite m_playerSprite_ne;
@@ -165,9 +168,10 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private void TakeHit(EnemyStateMachine enemy)
 	{
-		if (m_haveInvinsibilityFrames || m_haveGodMode || enemy.IsSpawning)
+		if (m_dead || m_haveInvinsibilityFrames || m_haveGodMode || enemy.IsSpawning)
 			return;
 		--Hp;
+		AudioManager.Instance.PlayClip(m_hitHurtAudioClip);
 		UIChanged?.Invoke();
 		if (Hp <= 0)
 		{
@@ -182,18 +186,20 @@ public class PlayerStateMachine : MonoBehaviour
 		m_haveInvinsibilityFrames = true;
 		float timer = 0f;
 		float timerB = 0f;
-		m_playerGraphics.SetActive(false);
+		m_playerGraphics.GetComponent<SpriteRenderer>().enabled = false;
 		while (timer < INVINSIBILITY_FRAMES)
 		{
 			timer += Time.deltaTime;
 			timerB += Time.deltaTime;
 			if (timerB > 0.2f)
 			{
-				m_playerGraphics.SetActive(!m_playerGraphics.activeSelf);
+				m_playerGraphics.GetComponent<SpriteRenderer>().enabled = !m_playerGraphics.GetComponent<SpriteRenderer>().enabled;
+				//m_playerGraphics.SetActive(!m_playerGraphics.activeSelf);
 				timerB = 0f;
 			}
 			yield return null;
 		}
+		m_playerGraphics.GetComponent<SpriteRenderer>().enabled = true;
 		m_playerGraphics.SetActive(true);
 		m_haveInvinsibilityFrames = false;
 	}
@@ -227,6 +233,7 @@ public class PlayerStateMachine : MonoBehaviour
 
 	public void AddScore(int score)
 	{
+		AudioManager.Instance.PlayClip(m_pickupScoreAudioClip);
 		Score += score;
 		UIChanged?.Invoke();
 		FindObjectOfType<UI>().HighlightScore();
@@ -240,8 +247,7 @@ public class PlayerStateMachine : MonoBehaviour
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				break;
 			case PickupType.Score:
-				Score += 100;
-				FindObjectOfType<UI>().HighlightScore();
+				AddScore(100);
 				break;
 			case PickupType.PowerupCharge:
 				PowerupCharges = Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
@@ -250,6 +256,8 @@ public class PlayerStateMachine : MonoBehaviour
 				break;
 			case PickupType.Powerup:
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
+				if (PowerupCharges > 0)
+					AudioManager.Instance.PlayClip(m_getLanceAudioClip);
 				if (PowerupCharges == 3)
 				{
 					PowerupCharges = 0;
@@ -376,6 +384,7 @@ public class PlayerStateMachine : MonoBehaviour
 	private IEnumerator DeathState()
 	{
 		UI.Instance.ActivateButtons();
+		AudioManager.Instance.PlayClip(m_dashAudioClip);
 		m_burstAnimator.SetBool("PlayerIsDead", true);
 		m_burstAnimator.SetTrigger("Stop");
 		m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprite_n;

@@ -266,6 +266,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b92c48022b1533b4b9b56b15976e70a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_selectAudioClip: {fileID: 8300000, guid: 4575e90c354f3e34589e30e534a53e2f, type: 3}
   m_gameOverMenu: {fileID: 41925236}
   m_player: {fileID: 660211020}
   m_scoreText: {fileID: 1681298649}
@@ -616,7 +617,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_powerupAudioClip: {fileID: 8300000, guid: c1d7d7303e85e0f4c956d8d95dd71498, type: 3}
-  m_dashAudioClip: {fileID: 0}
+  m_dashAudioClip: {fileID: 8300000, guid: 168dcfb34ebdb864e9da15edf7955652, type: 3}
+  m_getLanceAudioClip: {fileID: 8300000, guid: 0245967e9bf65954bad54bcbd1a4814d, type: 3}
+  m_hitHurtAudioClip: {fileID: 8300000, guid: 1840fc696a1f3bd4088e05fb2fa56b34, type: 3}
+  m_pickupScoreAudioClip: {fileID: 8300000, guid: b2ad558cbc14622448349d2b784591af, type: 3}
   m_playerSprite_n: {fileID: 1740904548, guid: 2d66ec8f3257e10489280537125fad80, type: 3}
   m_playerSprite_ne: {fileID: 1306437794, guid: 2d66ec8f3257e10489280537125fad80, type: 3}
   m_playerSprite_e: {fileID: 1371593587, guid: 2d66ec8f3257e10489280537125fad80, type: 3}
@@ -1433,6 +1437,7 @@ GameObject:
   - component: {fileID: 1276729935}
   - component: {fileID: 1276729937}
   - component: {fileID: 1276729936}
+  - component: {fileID: 1276729938}
   m_Layer: 0
   m_Name: BurstGraphics
   m_TagString: Untagged
@@ -1527,6 +1532,19 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &1276729938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1276729934}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8805713ed4469f044b75bc6000d9f609, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_clip: {fileID: 8300000, guid: 321584f265e51234a944b084c02f5e94, type: 3}
 --- !u!21 &1407615983
 Material:
   serializedVersion: 8

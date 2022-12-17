@@ -12,11 +12,12 @@ public class AudioManager : MonoBehaviour
 		Instance = this;
 	}
 
-	public void PlayClip(AudioClip clip)
+	public GameObject PlayClip(AudioClip clip)
 	{
-		GameObject soundObject = new GameObject();
+		GameObject soundObject = new GameObject(clip.name);
 		AudioSource audioSource = soundObject.AddComponent<AudioSource>();
 		audioSource.PlayOneShot(clip);
-		//Destroy(soundObject, clip.length);
+		Destroy(soundObject, clip.length);
+		return soundObject;
 	}
 }

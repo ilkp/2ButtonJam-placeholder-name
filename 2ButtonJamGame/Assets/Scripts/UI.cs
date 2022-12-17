@@ -10,6 +10,7 @@ public class UI : MonoBehaviour
 	private const float SCORE_HIGHLIGHT_TIME = 0.5f;
 	private float m_scoreHighlightTimer = 0f;
 	public static UI Instance { get; private set; }
+	[SerializeField] private AudioClip m_selectAudioClip;
 	[SerializeField] private GameObject m_gameOverMenu;
 	[SerializeField] private PlayerStateMachine m_player;
 	[SerializeField] private TMP_Text m_scoreText;
@@ -52,6 +53,7 @@ public class UI : MonoBehaviour
 				FindObjectOfType<PlayerStateMachine>().Restart();
 				FindObjectOfType<Spawner>().Restart();
 				FindObjectOfType<DifficultyTimer>().Restart();
+				AudioManager.Instance.PlayClip(m_selectAudioClip);
 				m_gameOverMenu.SetActive(false);
 				m_buttonsActive = false;
 			}
