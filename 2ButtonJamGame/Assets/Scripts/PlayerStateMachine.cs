@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(Animator))]
 public class PlayerStateMachine : MonoBehaviour
 {
 	private enum State
@@ -28,23 +27,47 @@ public class PlayerStateMachine : MonoBehaviour
 	private const float LANCE_DAMAGE_ARC = 45f;
 	private const float INVINSIBILITY_FRAMES = 2f;
 	private const float DRAG = 1.2f;
-	private readonly int RUN_ANIMATION_EAST = Animator.StringToHash("PlayerAnimationRunEast");
-	private readonly int RUN_ANIMATION_WEST = Animator.StringToHash("PlayerAnimationRunWest");
-	private readonly int RUN_ANIMATION_NORTH = Animator.StringToHash("PlayerAnimationRunNorth");
-	private readonly int RUN_ANIMATION_SOUTH = Animator.StringToHash("PlayerAnimationRunSouth");
 
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
 	private KeyCode m_leftKey = KeyCode.LeftArrow;
 	private KeyCode m_rightKey = KeyCode.RightArrow;
 
+	[SerializeField] private Sprite m_playerSprite_n;
+	[SerializeField] private Sprite m_playerSprite_ne;
+	[SerializeField] private Sprite m_playerSprite_e;
+	[SerializeField] private Sprite m_playerSprite_se;
+	[SerializeField] private Sprite m_playerSprite_s;
+	[SerializeField] private Sprite m_playerSprite_sw;
+	[SerializeField] private Sprite m_playerSprite_w;
+	[SerializeField] private Sprite m_playerSprite_nw;
+	[SerializeField] private Sprite m_lanceSprite_n;
+	[SerializeField] private Sprite m_lanceSprite_ne;
+	[SerializeField] private Sprite m_lanceSprite_e;
+	[SerializeField] private Sprite m_lanceSprite_se;
+	[SerializeField] private Sprite m_lanceSprite_s;
+	[SerializeField] private Sprite m_lanceSprite_sw;
+	[SerializeField] private Sprite m_lanceSprite_w;
+	[SerializeField] private Sprite m_lanceSprite_nw;
+
+	[SerializeField] private Animator m_burstAnimator;
 	[SerializeField] private GameObject m_playerGraphics;
 	[SerializeField] private GameObject m_lanceGraphics;
 	[SerializeField] private float m_maxAngularSpeed = 20f;
 	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
+	private readonly float[] m_playerSpriteAngles = new float[]
+	{
+		45f * 0.5f,
+		45f * 1.5f,
+		45f * 2.5f,
+		45f * 3.5f,
+		45f * 4f
+	};
+	private Sprite[] m_playerSprites;
+	private Sprite[] m_lanceSprites;
+	private int m_burstDirection;
 	private float m_godModeTimer = 0f;
 	private bool m_dead = false;
-	private Animator m_animator;
 	private float m_angularVelocity = 0f;
 	private State m_state;
 	private bool m_haveInvinsibilityFrames = false;
@@ -61,7 +84,32 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private void Start()
 	{
-		m_animator = GetComponent<Animator>();
+		m_playerSprites = new Sprite[]
+		{
+			m_playerSprite_e,
+			m_playerSprite_ne,
+			m_playerSprite_n,
+			m_playerSprite_nw,
+			m_playerSprite_w,
+			m_playerSprite_e,
+			m_playerSprite_se,
+			m_playerSprite_s,
+			m_playerSprite_sw,
+			m_playerSprite_w
+		};
+		m_lanceSprites = new Sprite[]
+		{
+			m_lanceSprite_e,
+			m_lanceSprite_ne,
+			m_lanceSprite_n,
+			m_lanceSprite_nw,
+			m_lanceSprite_w,
+			m_lanceSprite_e,
+			m_lanceSprite_se,
+			m_lanceSprite_s,
+			m_lanceSprite_sw,
+			m_lanceSprite_w
+		};
 		// We add states and corresponding function names into dictionary for easy access
 		string[] methodNames = GetType().GetMethods(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Select(x => x.Name).ToArray();
 		foreach (State state in Enum.GetValues(typeof(State)))
@@ -165,6 +213,7 @@ public class PlayerStateMachine : MonoBehaviour
 		}
 		m_playerGraphics.GetComponent<SpriteRenderer>().color = new Color(255f, 255f, 255f, 250f);
 		m_haveGodMode = false;
+		StartCoroutine(InvinsibilityFrames());
 	}
 	
 	private void SetLance(bool set)
@@ -246,36 +295,16 @@ public class PlayerStateMachine : MonoBehaviour
 
 			// Handle animation
 			float playerAngle = Mathf.Rad2Deg * Mathf.Acos(transform.position.x / transform.position.magnitude);
-			if (playerAngle < 45f || playerAngle > 135f)
+			for (int i = 0; i < m_playerSpriteAngles.Length; ++i)
 			{
-				if (transform.position.x >= 0)
+				if (playerAngle <= m_playerSpriteAngles[i])
 				{
-					m_animator.Play(RUN_ANIMATION_EAST);
-					m_lanceGraphics.transform.localPosition = new Vector3(0f, LANCE_DISTANCE, 0f);
-					m_lanceGraphics.transform.localRotation = Quaternion.Euler(0f, 0f, -90f);
-				}
-				else
-				{
-					m_animator.Play(RUN_ANIMATION_WEST);
-					m_lanceGraphics.transform.localPosition = new Vector3(0f, -LANCE_DISTANCE, 0f);
-					m_lanceGraphics.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+					m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprites[i + (transform.position.y > 0f ? 0 : 5)];
+					m_lanceGraphics.GetComponent<SpriteRenderer>().sprite = m_lanceSprites[i + (transform.position.y > 0f ? 0 : 5)];
+					break;
 				}
 			}
-			else
-			{
-				if (transform.position.y >= 0)
-				{
-					m_animator.Play(RUN_ANIMATION_NORTH);
-					m_lanceGraphics.transform.localPosition = new Vector3(-LANCE_DISTANCE, 0f, 0f);
-					m_lanceGraphics.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-				}
-				else
-				{
-					m_animator.Play(RUN_ANIMATION_SOUTH);
-					m_lanceGraphics.transform.localPosition = new Vector3(LANCE_DISTANCE, 0f, 0f);
-					m_lanceGraphics.transform.localRotation = Quaternion.Euler(0f, 0f, 180f);
-				}
-			}
+			m_lanceGraphics.transform.position = transform.position + new Vector3(transform.position.y, -transform.position.x, 0f).normalized;
 
 			// Handle movement
 			int moveDirection = 0;
@@ -292,6 +321,21 @@ public class PlayerStateMachine : MonoBehaviour
 			else
 				dashTimer = 0f;
 
+			// Handle burst animation
+			if (moveDirection != 0)
+				m_burstDirection = moveDirection;
+			m_burstAnimator.transform.position = transform.position + m_burstDirection * new Vector3(transform.position.y, -transform.position.x, 0f).normalized;
+			m_burstAnimator.transform.LookAt(m_burstAnimator.transform.position + new Vector3(0f, 0f, 1f), transform.position.normalized);
+			if (m_burstDirection == 1)
+				m_burstAnimator.gameObject.GetComponent<SpriteRenderer>().flipX = true;
+			else
+				m_burstAnimator.gameObject.GetComponent<SpriteRenderer>().flipX = false;
+
+			if (moveDirection != 0)
+				m_burstAnimator.SetBool("PressingMove", true);
+			else
+				m_burstAnimator.SetBool("PressingMove", false);
+
 			// State transitions
 			if (m_dead)
 				m_state = State.Death;
@@ -305,6 +349,7 @@ public class PlayerStateMachine : MonoBehaviour
 	private IEnumerator DashState()
 	{
 		Vector3 dashDirection = -transform.position.normalized;
+		m_burstAnimator.SetTrigger("Stop");
 		do
 		{
 			yield return null;
