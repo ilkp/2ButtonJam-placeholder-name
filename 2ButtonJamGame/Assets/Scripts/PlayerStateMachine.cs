@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(Animator))]
 public class PlayerStateMachine : MonoBehaviour
 {
 	private enum State
@@ -23,32 +22,59 @@ public class PlayerStateMachine : MonoBehaviour
 	public int Hp { get; private set; } = MAX_HP;
 	public int Score { get; private set; } = 0;
 
+	private const float GOD_MODE_TIME = 10f;
 	private const float LANCE_DISTANCE = 0.75f;
 	private const float LANCE_DAMAGE_ARC = 45f;
 	private const float INVINSIBILITY_FRAMES = 2f;
 	private const float DRAG = 1.2f;
-	private readonly int RUN_ANIMATION_EAST = Animator.StringToHash("PlayerAnimationRunEast");
-	private readonly int RUN_ANIMATION_WEST = Animator.StringToHash("PlayerAnimationRunWest");
-	private readonly int RUN_ANIMATION_NORTH = Animator.StringToHash("PlayerAnimationRunNorth");
-	private readonly int RUN_ANIMATION_SOUTH = Animator.StringToHash("PlayerAnimationRunSouth");
 
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
-	private KeyCode m_leftKey = KeyCode.LeftArrow;
-	private KeyCode m_rightKey = KeyCode.RightArrow;
+	private KeyCode m_leftKey = KeyCode.RightArrow;
+	private KeyCode m_rightKey = KeyCode.LeftArrow;
 
+	[SerializeField] private Sprite m_playerSprite_n;
+	[SerializeField] private Sprite m_playerSprite_ne;
+	[SerializeField] private Sprite m_playerSprite_e;
+	[SerializeField] private Sprite m_playerSprite_se;
+	[SerializeField] private Sprite m_playerSprite_s;
+	[SerializeField] private Sprite m_playerSprite_sw;
+	[SerializeField] private Sprite m_playerSprite_w;
+	[SerializeField] private Sprite m_playerSprite_nw;
+	[SerializeField] private Sprite m_lanceSprite_n;
+	[SerializeField] private Sprite m_lanceSprite_ne;
+	[SerializeField] private Sprite m_lanceSprite_e;
+	[SerializeField] private Sprite m_lanceSprite_se;
+	[SerializeField] private Sprite m_lanceSprite_s;
+	[SerializeField] private Sprite m_lanceSprite_sw;
+	[SerializeField] private Sprite m_lanceSprite_w;
+	[SerializeField] private Sprite m_lanceSprite_nw;
+
+	[SerializeField] private Animator m_burstAnimator;
 	[SerializeField] private GameObject m_playerGraphics;
 	[SerializeField] private GameObject m_lanceGraphics;
 	[SerializeField] private float m_maxAngularSpeed = 20f;
 	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
+	private readonly float[] m_playerSpriteAngles = new float[]
+	{
+		45f * 0.5f,
+		45f * 1.5f,
+		45f * 2.5f,
+		45f * 3.5f,
+		45f * 4f
+	};
+	private Sprite[] m_playerSprites;
+	private Sprite[] m_lanceSprites;
+	private int m_burstDirection;
+	private float m_godModeTimer = 0f;
 	private bool m_dead = false;
-	private Animator m_animator;
 	private float m_angularVelocity = 0f;
 	private State m_state;
-	private bool m_isInvinsible = false;
+	private bool m_haveInvinsibilityFrames = false;
 
 	private Vector3 m_previousFramePosition;
-	private bool m_haveLance = true;
+	private bool m_haveLance = false;
+	private bool m_haveGodMode = false;
 
 
 	private void Awake()
@@ -58,7 +84,32 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private void Start()
 	{
-		m_animator = GetComponent<Animator>();
+		m_playerSprites = new Sprite[]
+		{
+			m_playerSprite_e,
+			m_playerSprite_ne,
+			m_playerSprite_n,
+			m_playerSprite_nw,
+			m_playerSprite_w,
+			m_playerSprite_e,
+			m_playerSprite_se,
+			m_playerSprite_s,
+			m_playerSprite_sw,
+			m_playerSprite_w
+		};
+		m_lanceSprites = new Sprite[]
+		{
+			m_lanceSprite_e,
+			m_lanceSprite_ne,
+			m_lanceSprite_n,
+			m_lanceSprite_nw,
+			m_lanceSprite_w,
+			m_lanceSprite_e,
+			m_lanceSprite_se,
+			m_lanceSprite_s,
+			m_lanceSprite_sw,
+			m_lanceSprite_w
+		};
 		// We add states and corresponding function names into dictionary for easy access
 		string[] methodNames = GetType().GetMethods(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Select(x => x.Name).ToArray();
 		foreach (State state in Enum.GetValues(typeof(State)))
@@ -71,7 +122,8 @@ public class PlayerStateMachine : MonoBehaviour
 			}
 			m_stateFunctionNames.Add(state, methodName);
 		}
-		Restart();
+		m_state = State.Spawn;
+		NextState();
 	}
 
 	private void Update()
@@ -90,10 +142,11 @@ public class PlayerStateMachine : MonoBehaviour
 		if (collision.CompareTag("Enemy"))
 		{
 			//Vector3 prevPositionToCurrent = transform.position - m_previousFramePosition;
-			if (m_haveLance)// && prevPositionToCurrent.magnitude > 0f && Vector3.Angle(prevPositionToCurrent, collision.transform.position - transform.position) <= LANCE_DAMAGE_ARC)
+			if (m_haveLance || m_haveGodMode)// && prevPositionToCurrent.magnitude > 0f && Vector3.Angle(prevPositionToCurrent, collision.transform.position - transform.position) <= LANCE_DAMAGE_ARC)
 			{
 				collision.GetComponent<EnemyStateMachine>().TakeHit();
-				SetLance(false);
+				if (!m_haveGodMode)
+					SetLance(false);
 			}
 			else
 			{
@@ -105,12 +158,11 @@ public class PlayerStateMachine : MonoBehaviour
 	public void Restart()
 	{
 		m_state = State.Spawn;
-		NextState();
 	}
 
 	private void TakeHit()
 	{
-		if (m_isInvinsible)
+		if (m_haveInvinsibilityFrames || m_haveGodMode)
 			return;
 		--Hp;
 		UIChanged?.Invoke();
@@ -124,7 +176,7 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator InvinsibilityFrames()
 	{
-		m_isInvinsible = true;
+		m_haveInvinsibilityFrames = true;
 		float timer = 0f;
 		float timerB = 0f;
 		m_playerGraphics.SetActive(false);
@@ -140,7 +192,28 @@ public class PlayerStateMachine : MonoBehaviour
 			yield return null;
 		}
 		m_playerGraphics.SetActive(true);
-		m_isInvinsible = false;
+		m_haveInvinsibilityFrames = false;
+	}
+
+	private void StartGodMode()
+	{
+		m_godModeTimer = GOD_MODE_TIME;
+		if (!m_haveGodMode)
+			StartCoroutine(GodMode());
+	}
+
+	private IEnumerator GodMode()
+	{
+		m_haveGodMode = true;
+		m_playerGraphics.GetComponent<SpriteRenderer>().color = new Color(250f, 0f, 250f, 250f);
+		while (m_godModeTimer > 0f)
+		{
+			m_godModeTimer -= Time.deltaTime;
+			yield return null;
+		}
+		m_playerGraphics.GetComponent<SpriteRenderer>().color = new Color(255f, 255f, 255f, 250f);
+		m_haveGodMode = false;
+		StartCoroutine(InvinsibilityFrames());
 	}
 	
 	private void SetLance(bool set)
@@ -149,21 +222,41 @@ public class PlayerStateMachine : MonoBehaviour
 		m_lanceGraphics.SetActive(set);
 	}
 
+	public void AddScore(int score)
+	{
+		Score += score;
+		UIChanged?.Invoke();
+		FindObjectOfType<UI>().HighlightScore();
+	}
+
 	public void ReceivePickup(PickupType type)
 	{
 		switch (type)
 		{
 			case PickupType.Life:
-				Mathf.Clamp(++Hp, 0, MAX_HP);
+				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				break;
 			case PickupType.Score:
+				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				Score += 100;
+				FindObjectOfType<UI>().HighlightScore();
 				break;
 			case PickupType.PowerupCharge:
-				Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
+				PowerupCharges = Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
 				break;
 			case PickupType.Powerup:
-				if (PowerupCharges > 0)
+				if (PowerupCharges == 3)
+				{
+					PowerupCharges = 0;
+					StartGodMode();
+					SetLance(true);
+				}
+				else if (PowerupCharges == 2)
+				{
+					PowerupCharges = 0;
+					StartGodMode();
+				}
+				else if (PowerupCharges == 1)
 				{
 					PowerupCharges = 0;
 					SetLance(true);
@@ -182,7 +275,7 @@ public class PlayerStateMachine : MonoBehaviour
 	{
 		m_playerGraphics.SetActive(true);
 		SetLance(false);
-		transform.position = new Vector3(-GlobalConstants.MAP_RADIUS, 0f, 0f);
+		transform.position = new Vector3(0f, GlobalConstants.MAP_RADIUS, 0f);
 		m_dead = false;
 		m_angularVelocity = 0;
 		Hp = MAX_HP;
@@ -205,36 +298,16 @@ public class PlayerStateMachine : MonoBehaviour
 
 			// Handle animation
 			float playerAngle = Mathf.Rad2Deg * Mathf.Acos(transform.position.x / transform.position.magnitude);
-			if (playerAngle < 45f || playerAngle > 135f)
+			for (int i = 0; i < m_playerSpriteAngles.Length; ++i)
 			{
-				if (transform.position.x >= 0)
+				if (playerAngle <= m_playerSpriteAngles[i])
 				{
-					m_animator.Play(RUN_ANIMATION_EAST);
-					m_lanceGraphics.transform.localPosition = new Vector3(0f, LANCE_DISTANCE, 0f);
-					m_lanceGraphics.transform.localRotation = Quaternion.Euler(0f, 0f, -90f);
-				}
-				else
-				{
-					m_animator.Play(RUN_ANIMATION_WEST);
-					m_lanceGraphics.transform.localPosition = new Vector3(0f, -LANCE_DISTANCE, 0f);
-					m_lanceGraphics.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+					m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprites[i + (transform.position.y > 0f ? 0 : 5)];
+					m_lanceGraphics.GetComponent<SpriteRenderer>().sprite = m_lanceSprites[i + (transform.position.y > 0f ? 0 : 5)];
+					break;
 				}
 			}
-			else
-			{
-				if (transform.position.y >= 0)
-				{
-					m_animator.Play(RUN_ANIMATION_NORTH);
-					m_lanceGraphics.transform.localPosition = new Vector3(-LANCE_DISTANCE, 0f, 0f);
-					m_lanceGraphics.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-				}
-				else
-				{
-					m_animator.Play(RUN_ANIMATION_SOUTH);
-					m_lanceGraphics.transform.localPosition = new Vector3(LANCE_DISTANCE, 0f, 0f);
-					m_lanceGraphics.transform.localRotation = Quaternion.Euler(0f, 0f, 180f);
-				}
-			}
+			m_lanceGraphics.transform.position = transform.position + new Vector3(transform.position.y, -transform.position.x, 0f).normalized;
 
 			// Handle movement
 			int moveDirection = 0;
@@ -251,6 +324,21 @@ public class PlayerStateMachine : MonoBehaviour
 			else
 				dashTimer = 0f;
 
+			// Handle burst animation
+			if (moveDirection != 0)
+				m_burstDirection = moveDirection;
+			m_burstAnimator.transform.position = transform.position + m_burstDirection * new Vector3(transform.position.y, -transform.position.x, 0f).normalized;
+			m_burstAnimator.transform.LookAt(m_burstAnimator.transform.position + new Vector3(0f, 0f, 1f), transform.position.normalized);
+			if (m_burstDirection == 1)
+				m_burstAnimator.gameObject.GetComponent<SpriteRenderer>().flipX = true;
+			else
+				m_burstAnimator.gameObject.GetComponent<SpriteRenderer>().flipX = false;
+
+			if (moveDirection != 0)
+				m_burstAnimator.SetBool("PressingMove", true);
+			else
+				m_burstAnimator.SetBool("PressingMove", false);
+
 			// State transitions
 			if (m_dead)
 				m_state = State.Death;
@@ -264,6 +352,7 @@ public class PlayerStateMachine : MonoBehaviour
 	private IEnumerator DashState()
 	{
 		Vector3 dashDirection = -transform.position.normalized;
+		m_burstAnimator.SetTrigger("Stop");
 		do
 		{
 			yield return null;
@@ -281,8 +370,31 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator DeathState()
 	{
-		m_playerGraphics.SetActive(false);
-		yield return null;
 		UI.Instance.ActivateButtons();
+		m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprite_n;
+		Vector3 rotate = new Vector3(0f, 0f, 120f);
+		float timer = 0f;
+		float maxTime = 2.5f;
+		do
+		{
+			if (timer < maxTime)
+			{
+				m_playerGraphics.transform.localPosition = Vector3.Lerp(Vector3.one, -transform.position, timer / maxTime);
+				m_playerGraphics.transform.Rotate(rotate * Time.deltaTime);
+				m_playerGraphics.transform.localScale = Vector3.Lerp(Vector3.one, Vector3.zero, timer / maxTime);
+				timer += Time.deltaTime;
+			}
+			else
+			{
+				m_playerGraphics.SetActive(false);
+			}
+			yield return null;
+
+		} while (m_state == State.Death);
+		m_playerGraphics.transform.localPosition = Vector3.zero;
+		m_playerGraphics.transform.localScale = Vector3.one;
+		m_playerGraphics.transform.localRotation = Quaternion.identity;
+		m_playerGraphics.SetActive(true);
+		NextState();
 	}
 }

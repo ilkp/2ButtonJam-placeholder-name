@@ -77,8 +77,10 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 
 	private IEnumerator DeathState()
 	{
-		yield return null;
+		GetComponent<BoxCollider2D>().enabled= false;
+		GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerStateMachine>().AddScore(50);
 		Spawner.Instance.RemoveEnemy(m_type);
+		yield return null;
 		Destroy(gameObject);
 	}
 }
