@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class Pickup : MonoBehaviour
 {
+	[SerializeField] private GameObject m_sparkle;
 	[SerializeField] private PickupType type;
 	public PickupType Type
 	{
@@ -16,6 +17,8 @@ public class Pickup : MonoBehaviour
 		{
 			GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerStateMachine>().ReceivePickup(type);
 			Spawner.Instance.RemovePickup(type);
+			if (type == PickupType.Score)
+				Instantiate(m_sparkle, transform.position, Quaternion.identity);
 			Destroy(gameObject);
 		}
 	}
