@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 077860e6316be8843ae430113c95bd8f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_deathSound: {fileID: 8300000, guid: 2fcb4072cffb0af4f92949546d85394e, type: 3}
+  m_explosionPrefab: {fileID: 8228721754265208345, guid: 0c99012dc2b2d594f95b3c0ec768ca0d, type: 3}
   m_maxAngularSpeed: 70
   m_angularAcceleration: 40
 --- !u!95 &4987248241020953762

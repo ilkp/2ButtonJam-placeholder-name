@@ -6,14 +6,14 @@ using UnityEngine;
 [RequireComponent (typeof(SpriteRenderer))]
 public class EnemyStateMachine : MonoBehaviour
 {
-	[SerializeField] private AudioClip m_deathSound;
+	[SerializeField] private GameObject m_explosionPrefab;
 	public bool IsSpawning { get; protected set; }
 	protected float SPAWN_FLASH_TIME = 1f;
 	protected bool m_dead = false;
 
 	public void TakeHit()
 	{
-		AudioManager.Instance.PlayClip(m_deathSound);
+		Instantiate(m_explosionPrefab, transform.position, Quaternion.identity);
 		m_dead = true;
 		GetComponent<BoxCollider2D>().enabled = false;
 	}
