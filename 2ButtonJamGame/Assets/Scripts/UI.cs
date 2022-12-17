@@ -65,7 +65,7 @@ public class UI : MonoBehaviour
 	private IEnumerator ActivateButtonsDelay()
 	{
 		float timer = 0f;
-		while (timer < 1f)
+		while (timer < 0.5f)
 		{
 			timer += Time.deltaTime;
 			yield return null;

@@ -29,8 +29,8 @@ public class PlayerStateMachine : MonoBehaviour
 	private const float DRAG = 1.2f;
 
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
-	private KeyCode m_leftKey = KeyCode.LeftArrow;
-	private KeyCode m_rightKey = KeyCode.RightArrow;
+	private KeyCode m_leftKey = KeyCode.RightArrow;
+	private KeyCode m_rightKey = KeyCode.LeftArrow;
 
 	[SerializeField] private Sprite m_playerSprite_n;
 	[SerializeField] private Sprite m_playerSprite_ne;
@@ -236,6 +236,7 @@ public class PlayerStateMachine : MonoBehaviour
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				break;
 			case PickupType.Score:
+				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				Score += 100;
 				break;
 			case PickupType.PowerupCharge:
@@ -272,7 +273,7 @@ public class PlayerStateMachine : MonoBehaviour
 	{
 		m_playerGraphics.SetActive(true);
 		SetLance(false);
-		transform.position = new Vector3(-GlobalConstants.MAP_RADIUS, 0f, 0f);
+		transform.position = new Vector3(0f, GlobalConstants.MAP_RADIUS, 0f);
 		m_dead = false;
 		m_angularVelocity = 0;
 		Hp = MAX_HP;

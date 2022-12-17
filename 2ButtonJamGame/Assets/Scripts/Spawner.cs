@@ -33,7 +33,14 @@ public class Spawner : MonoBehaviour
 	private void Update()
 	{
 		m_enemies[EnemyType.Rotator].maxAlive = Mathf.Max(DifficultyTimer.Instance.DifficultyStage / 3, 1);
-		m_enemies[EnemyType.Chaser].maxAlive = Mathf.Max(DifficultyTimer.Instance.DifficultyStage / 5, 1);
+		m_enemies[EnemyType.Chaser].maxAlive = Mathf.Max(DifficultyTimer.Instance.DifficultyStage / 6, 1);
+		if (DifficultyTimer.Instance.DifficultyStage > 5)
+			m_pickups[PickupType.Score].maxAlive = 2;
+		else if (DifficultyTimer.Instance.DifficultyStage > 10)
+		{
+			m_pickups[PickupType.Score].maxAlive = 3;
+			m_pickups[PickupType.PowerupCharge].spawnTime = 8;
+		}
 
 		// pickups
 		foreach (var pickup in m_pickups.Values)
