@@ -33,6 +33,7 @@ public class PlayerStateMachine : MonoBehaviour
 	private KeyCode m_rightKey = KeyCode.LeftArrow;
 
 	[SerializeField] private AudioClip m_powerupAudioClip;
+	[SerializeField] private AudioClip m_deathAudioClip;
 	[SerializeField] private AudioClip m_dashAudioClip;
 	[SerializeField] private AudioClip m_getLanceAudioClip;
 	[SerializeField] private AudioClip m_hitHurtAudioClip;
@@ -233,7 +234,6 @@ public class PlayerStateMachine : MonoBehaviour
 
 	public void AddScore(int score)
 	{
-		AudioManager.Instance.PlayClip(m_pickupScoreAudioClip);
 		Score += score;
 		UIChanged?.Invoke();
 		FindObjectOfType<UI>().HighlightScore();
@@ -247,6 +247,7 @@ public class PlayerStateMachine : MonoBehaviour
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				break;
 			case PickupType.Score:
+				AudioManager.Instance.PlayClip(m_pickupScoreAudioClip);
 				AddScore(100);
 				break;
 			case PickupType.PowerupCharge:
@@ -364,6 +365,7 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator DashState()
 	{
+		AudioManager.Instance.PlayClip(m_deathAudioClip);
 		Vector3 dashDirection = -transform.position.normalized;
 		m_burstAnimator.SetTrigger("Stop");
 		do

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class UI : MonoBehaviour
 {
@@ -62,7 +63,10 @@ public class UI : MonoBehaviour
 #if UNITY_EDITOR
 				UnityEditor.EditorApplication.isPlaying = false;
 #else
-				Application.Quit();
+				if (Application.platform == RuntimePlatform.WebGLPlayer)
+					SceneManager.LoadScene(0);
+				else
+					Application.Quit();
 #endif
 			}
 		}

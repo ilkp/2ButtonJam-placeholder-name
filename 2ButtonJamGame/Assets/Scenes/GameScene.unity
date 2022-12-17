@@ -617,7 +617,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_powerupAudioClip: {fileID: 8300000, guid: c1d7d7303e85e0f4c956d8d95dd71498, type: 3}
-  m_dashAudioClip: {fileID: 8300000, guid: 168dcfb34ebdb864e9da15edf7955652, type: 3}
+  m_deathAudioClip: {fileID: 8300000, guid: 168dcfb34ebdb864e9da15edf7955652, type: 3}
+  m_dashAudioClip: {fileID: 8300000, guid: d50c213bf9d0452459a0bf2801d92de4, type: 3}
   m_getLanceAudioClip: {fileID: 8300000, guid: 0245967e9bf65954bad54bcbd1a4814d, type: 3}
   m_hitHurtAudioClip: {fileID: 8300000, guid: 1840fc696a1f3bd4088e05fb2fa56b34, type: 3}
   m_pickupScoreAudioClip: {fileID: 8300000, guid: b2ad558cbc14622448349d2b784591af, type: 3}
@@ -1272,7 +1273,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -419, y: 329}
+  m_AnchoredPosition: {x: -570, y: 370}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &991172237
@@ -1544,7 +1545,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8805713ed4469f044b75bc6000d9f609, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_clip: {fileID: 8300000, guid: 321584f265e51234a944b084c02f5e94, type: 3}
+  m_clip: {fileID: 8300000, guid: 507523a0502d1684b8afa12fe7ba9eff, type: 3}
 --- !u!21 &1407615983
 Material:
   serializedVersion: 8
@@ -1795,7 +1796,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -407, y: -291}
+  m_AnchoredPosition: {x: -540, y: -370}
   m_SizeDelta: {x: 214.06, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1681298649
@@ -2370,7 +2371,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 409, y: 329}
+  m_AnchoredPosition: {x: 570, y: 370}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!21 &2039877387
