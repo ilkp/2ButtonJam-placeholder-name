@@ -579,6 +579,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a64da565600443c439d5f3ad8f4926b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_powerupAudioClip: {fileID: 8300000, guid: c1d7d7303e85e0f4c956d8d95dd71498, type: 3}
+  m_dashAudioClip: {fileID: 0}
   m_playerSprite_n: {fileID: 1740904548, guid: 2d66ec8f3257e10489280537125fad80, type: 3}
   m_playerSprite_ne: {fileID: 1306437794, guid: 2d66ec8f3257e10489280537125fad80, type: 3}
   m_playerSprite_e: {fileID: 1371593587, guid: 2d66ec8f3257e10489280537125fad80, type: 3}
@@ -1106,6 +1108,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 991172237}
   m_CullTransparentMesh: 1
+--- !u!1 &1004593555
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1004593557}
+  - component: {fileID: 1004593556}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1004593556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1004593555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94cc6c585fd841d44858b68f5efc3ffa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1004593557
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1004593555}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1276729934
 GameObject:
   m_ObjectHideFlags: 0
@@ -1557,7 +1603,7 @@ SpriteRenderer:
   m_SortingLayerID: 1574963141
   m_SortingLayer: -1
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 6f4e2f0503629df48b5a4177e487b267, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 746f278613969f24392c2cee532bff4a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
