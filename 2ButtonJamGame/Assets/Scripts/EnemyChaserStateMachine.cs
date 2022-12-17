@@ -55,10 +55,12 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 	private IEnumerator SpawnState()
 	{
 		m_dead = false;
+		IsSpawning = true;
 		Vector3 direction = GameObject.FindGameObjectWithTag("Player").transform.position.normalized;
 		direction = new Vector3(direction.y, -direction.x, 0f);
 		direction.x *= UnityEngine.Random.Range(0f, 1f) > 0.5f ? 1f : -1f;
 		transform.position = GlobalConstants.MAP_RADIUS * direction;
+		StartCoroutine(SpawnFlashing());
 		yield return null;
 		m_state = State.Run;
 		NextState();

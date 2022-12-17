@@ -134,7 +134,7 @@ public class PlayerStateMachine : MonoBehaviour
 	private void OnTriggerStay2D(Collider2D collision)
 	{
 		if (collision.CompareTag("Enemy"))
-			TakeHit();
+			TakeHit(collision.GetComponent<EnemyStateMachine>());
 	}
 
 	private void OnTriggerEnter2D(Collider2D collision)
@@ -150,7 +150,7 @@ public class PlayerStateMachine : MonoBehaviour
 			}
 			else
 			{
-				TakeHit();
+				TakeHit(collision.GetComponent<EnemyStateMachine>());
 			}
 		}
 	}
@@ -160,9 +160,9 @@ public class PlayerStateMachine : MonoBehaviour
 		m_state = State.Spawn;
 	}
 
-	private void TakeHit()
+	private void TakeHit(EnemyStateMachine enemy)
 	{
-		if (m_haveInvinsibilityFrames || m_haveGodMode)
+		if (m_haveInvinsibilityFrames || m_haveGodMode || enemy.IsSpawning)
 			return;
 		--Hp;
 		UIChanged?.Invoke();
@@ -237,7 +237,6 @@ public class PlayerStateMachine : MonoBehaviour
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				break;
 			case PickupType.Score:
-				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				Score += 100;
 				FindObjectOfType<UI>().HighlightScore();
 				break;
@@ -245,6 +244,7 @@ public class PlayerStateMachine : MonoBehaviour
 				PowerupCharges = Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
 				break;
 			case PickupType.Powerup:
+				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				if (PowerupCharges == 3)
 				{
 					PowerupCharges = 0;
@@ -371,6 +371,8 @@ public class PlayerStateMachine : MonoBehaviour
 	private IEnumerator DeathState()
 	{
 		UI.Instance.ActivateButtons();
+		m_burstAnimator.SetBool("PlayerIsDead", true);
+		m_burstAnimator.SetTrigger("Stop");
 		m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprite_n;
 		Vector3 rotate = new Vector3(0f, 0f, 120f);
 		float timer = 0f;
@@ -391,6 +393,7 @@ public class PlayerStateMachine : MonoBehaviour
 			yield return null;
 
 		} while (m_state == State.Death);
+		m_burstAnimator.SetBool("PlayerIsDead", false);
 		m_playerGraphics.transform.localPosition = Vector3.zero;
 		m_playerGraphics.transform.localScale = Vector3.one;
 		m_playerGraphics.transform.localRotation = Quaternion.identity;

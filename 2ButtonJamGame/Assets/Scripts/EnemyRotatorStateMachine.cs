@@ -14,6 +14,8 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 		Death
 	}
 
+	public bool IsSpawning { get; private set; }
+	private const float SPAWN_FLASH_TIME = 1f;
 	private const EnemyType m_type = EnemyType.Rotator;
 	private readonly int RUN_ANIMATION = Animator.StringToHash("RotatorAnimation");
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
@@ -39,6 +41,7 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 		m_state = State.Spawn;
 		NextState();
 	}
+
 	private void NextState()
 	{
 		StartCoroutine(m_stateFunctionNames[m_state]);
@@ -47,6 +50,8 @@ public class EnemyRotatorStateMachine : EnemyStateMachine
 	private IEnumerator SpawnState()
 	{
 		m_dead = false;
+		IsSpawning = true;
+		StartCoroutine(SpawnFlashing());
 		float angle = UnityEngine.Random.Range(0f, 2 * Mathf.PI);
 		float randomDistance = UnityEngine.Random.Range(-0.2f * GlobalConstants.MAP_RADIUS, 0.2f * GlobalConstants.MAP_RADIUS);
 		transform.position = (0.5f * GlobalConstants.MAP_RADIUS + randomDistance) * new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
