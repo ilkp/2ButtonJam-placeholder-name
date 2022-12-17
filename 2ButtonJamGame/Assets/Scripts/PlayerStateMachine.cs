@@ -365,7 +365,7 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator DashState()
 	{
-		AudioManager.Instance.PlayClip(m_deathAudioClip);
+		AudioManager.Instance.PlayClip(m_dashAudioClip);
 		Vector3 dashDirection = -transform.position.normalized;
 		m_burstAnimator.SetTrigger("Stop");
 		do
@@ -386,7 +386,7 @@ public class PlayerStateMachine : MonoBehaviour
 	private IEnumerator DeathState()
 	{
 		UI.Instance.ActivateButtons();
-		AudioManager.Instance.PlayClip(m_dashAudioClip);
+		AudioManager.Instance.PlayClip(m_deathAudioClip);
 		m_burstAnimator.SetBool("PlayerIsDead", true);
 		m_burstAnimator.SetTrigger("Stop");
 		m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprite_n;
