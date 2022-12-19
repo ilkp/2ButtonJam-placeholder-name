@@ -16,8 +16,10 @@ public class PlayerStateMachine : MonoBehaviour
 	}
 
 	public Action UIChanged;
+
 	public const int MAX_POWERUPS = 3;
 	public const int MAX_HP = 3;
+
 	public int PowerupCharges { get; private set; } = 0;
 	public int Hp { get; private set; } = MAX_HP;
 	public int Score { get; private set; } = 0;
@@ -32,46 +34,14 @@ public class PlayerStateMachine : MonoBehaviour
 	private KeyCode m_leftKey = KeyCode.RightArrow;
 	private KeyCode m_rightKey = KeyCode.LeftArrow;
 
-	[SerializeField] private AudioClip m_powerupAudioClip;
-	[SerializeField] private AudioClip m_deathAudioClip;
-	[SerializeField] private AudioClip m_dashAudioClip;
-	[SerializeField] private AudioClip m_getLanceAudioClip;
-	[SerializeField] private AudioClip m_hitHurtAudioClip;
-	[SerializeField] private AudioClip m_pickupScoreAudioClip;
-
-	[SerializeField] private Sprite m_playerSprite_n;
-	[SerializeField] private Sprite m_playerSprite_ne;
-	[SerializeField] private Sprite m_playerSprite_e;
-	[SerializeField] private Sprite m_playerSprite_se;
-	[SerializeField] private Sprite m_playerSprite_s;
-	[SerializeField] private Sprite m_playerSprite_sw;
-	[SerializeField] private Sprite m_playerSprite_w;
-	[SerializeField] private Sprite m_playerSprite_nw;
-	[SerializeField] private Sprite m_lanceSprite_n;
-	[SerializeField] private Sprite m_lanceSprite_ne;
-	[SerializeField] private Sprite m_lanceSprite_e;
-	[SerializeField] private Sprite m_lanceSprite_se;
-	[SerializeField] private Sprite m_lanceSprite_s;
-	[SerializeField] private Sprite m_lanceSprite_sw;
-	[SerializeField] private Sprite m_lanceSprite_w;
-	[SerializeField] private Sprite m_lanceSprite_nw;
-
 	[SerializeField] private Animator m_burstAnimator;
 	[SerializeField] private GameObject m_playerGraphics;
 	[SerializeField] private GameObject m_lanceGraphics;
 	[SerializeField] private float m_maxAngularSpeed = 20f;
 	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
-	private readonly float[] m_playerSpriteAngles = new float[]
-	{
-		45f * 0.5f,
-		45f * 1.5f,
-		45f * 2.5f,
-		45f * 3.5f,
-		45f * 4f
-	};
-	private Sprite[] m_playerSprites;
-	private Sprite[] m_lanceSprites;
+	private (float, Sprite[])[] m_playerSprites;
+	private (float, Sprite[])[] m_lanceSprites;
 	private int m_burstDirection;
 	private float m_godModeTimer = 0f;
 	private bool m_dead = false;
@@ -91,32 +61,6 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private void Start()
 	{
-		m_playerSprites = new Sprite[]
-		{
-			m_playerSprite_e,
-			m_playerSprite_ne,
-			m_playerSprite_n,
-			m_playerSprite_nw,
-			m_playerSprite_w,
-			m_playerSprite_e,
-			m_playerSprite_se,
-			m_playerSprite_s,
-			m_playerSprite_sw,
-			m_playerSprite_w
-		};
-		m_lanceSprites = new Sprite[]
-		{
-			m_lanceSprite_e,
-			m_lanceSprite_ne,
-			m_lanceSprite_n,
-			m_lanceSprite_nw,
-			m_lanceSprite_w,
-			m_lanceSprite_e,
-			m_lanceSprite_se,
-			m_lanceSprite_s,
-			m_lanceSprite_sw,
-			m_lanceSprite_w
-		};
 		// We add states and corresponding function names into dictionary for easy access
 		string[] methodNames = GetType().GetMethods(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Select(x => x.Name).ToArray();
 		foreach (State state in Enum.GetValues(typeof(State)))
@@ -129,6 +73,23 @@ public class PlayerStateMachine : MonoBehaviour
 			}
 			m_stateFunctionNames.Add(state, methodName);
 		}
+
+		m_playerSprites = new (float, Sprite[])[]
+		{
+			new (45f * 0.5f, new[]{GameAssets.Instance.sprite_player[2], GameAssets.Instance.sprite_player[2] }),
+			new (45f * 1.5f, new[]{GameAssets.Instance.sprite_player[1], GameAssets.Instance.sprite_player[3] }),
+			new (45f * 2.5f, new[]{GameAssets.Instance.sprite_player[0], GameAssets.Instance.sprite_player[4] }),
+			new (45f * 3.5f, new[]{GameAssets.Instance.sprite_player[7], GameAssets.Instance.sprite_player[5] }),
+			new (45f * 4.0f, new[]{GameAssets.Instance.sprite_player[6], GameAssets.Instance.sprite_player[6] })
+		};
+		m_lanceSprites = new (float, Sprite[])[]
+		{
+			new (45f * 0.5f, new[]{GameAssets.Instance.sprite_lance[2], GameAssets.Instance.sprite_lance[2] }),
+			new (45f * 1.5f, new[]{GameAssets.Instance.sprite_lance[1], GameAssets.Instance.sprite_lance[3] }),
+			new (45f * 2.5f, new[]{GameAssets.Instance.sprite_lance[0], GameAssets.Instance.sprite_lance[4] }),
+			new (45f * 3.5f, new[]{GameAssets.Instance.sprite_lance[7], GameAssets.Instance.sprite_lance[5] }),
+			new (45f * 4.0f, new[]{GameAssets.Instance.sprite_lance[6], GameAssets.Instance.sprite_lance[6] })
+		};
 		m_state = State.Spawn;
 		NextState();
 	}
@@ -172,7 +133,7 @@ public class PlayerStateMachine : MonoBehaviour
 		if (m_dead || m_haveInvinsibilityFrames || m_haveGodMode || enemy.IsSpawning)
 			return;
 		--Hp;
-		AudioManager.Instance.PlayClip(m_hitHurtAudioClip);
+		AudioManager.Instance.PlayClip(GameAssets.Instance.sound_playerHit[0]);
 		UIChanged?.Invoke();
 		if (Hp <= 0)
 		{
@@ -247,18 +208,18 @@ public class PlayerStateMachine : MonoBehaviour
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				break;
 			case PickupType.Score:
-				AudioManager.Instance.PlayClip(m_pickupScoreAudioClip);
+				AudioManager.Instance.PlayClip(GameAssets.Instance.sound_pickupScore[0]);
 				AddScore(100);
 				break;
 			case PickupType.PowerupCharge:
 				PowerupCharges = Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
 				if (AudioManager.Instance)
-					AudioManager.Instance.PlayClip(m_powerupAudioClip);
+					AudioManager.Instance.PlayClip(GameAssets.Instance.sound_pickupPowerup[0]);
 				break;
 			case PickupType.Powerup:
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				if (PowerupCharges > 0)
-					AudioManager.Instance.PlayClip(m_getLanceAudioClip);
+					AudioManager.Instance.PlayClip(GameAssets.Instance.sound_getLance[0]);
 				if (PowerupCharges == 3)
 				{
 					PowerupCharges = 0;
@@ -312,12 +273,12 @@ public class PlayerStateMachine : MonoBehaviour
 
 			// Handle animation
 			float playerAngle = Mathf.Rad2Deg * Mathf.Acos(transform.position.x / transform.position.magnitude);
-			for (int i = 0; i < m_playerSpriteAngles.Length; ++i)
+			for (int i = 0; i < m_playerSprites.Length; ++i)
 			{
-				if (playerAngle <= m_playerSpriteAngles[i])
+				if (playerAngle <= m_playerSprites[i].Item1)
 				{
-					m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprites[i + (transform.position.y > 0f ? 0 : 5)];
-					m_lanceGraphics.GetComponent<SpriteRenderer>().sprite = m_lanceSprites[i + (transform.position.y > 0f ? 0 : 5)];
+					m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprites[i].Item2[transform.position.y > 0f ? 0 : 1];
+					m_lanceGraphics.GetComponent<SpriteRenderer>().sprite = m_lanceSprites[i].Item2[transform.position.y > 0f ? 0 : 1];
 					break;
 				}
 			}
@@ -365,7 +326,7 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator DashState()
 	{
-		AudioManager.Instance.PlayClip(m_dashAudioClip);
+		AudioManager.Instance.PlayClip(GameAssets.Instance.sound_dash[0]);
 		Vector3 dashDirection = -transform.position.normalized;
 		m_burstAnimator.SetTrigger("Stop");
 		do
@@ -386,10 +347,10 @@ public class PlayerStateMachine : MonoBehaviour
 	private IEnumerator DeathState()
 	{
 		UI.Instance.ActivateButtons();
-		AudioManager.Instance.PlayClip(m_deathAudioClip);
+		AudioManager.Instance.PlayClip(GameAssets.Instance.sound_playerDeath[0]);
 		m_burstAnimator.SetBool("PlayerIsDead", true);
 		m_burstAnimator.SetTrigger("Stop");
-		m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprite_n;
+		m_playerGraphics.GetComponent<SpriteRenderer>().sprite = GameAssets.Instance.sprite_player[0];
 		Vector3 rotate = new Vector3(0f, 0f, 120f);
 		float timer = 0f;
 		float maxTime = 2.5f;

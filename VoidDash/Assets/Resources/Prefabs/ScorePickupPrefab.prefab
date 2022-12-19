@@ -47,8 +47,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a184d04dc72604d429590f8ab6d30223, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_sparkle: {fileID: 3758523011662452652, guid: 2556ed60a79193d459c8116e47821664, type: 3}
-  type: 0
+  m_sparklePrefab: {fileID: 0}
+  m_type: 0
+  m_afterEffectPrefab: {fileID: 3758523011662452652, guid: 2556ed60a79193d459c8116e47821664, type: 3}
 --- !u!95 &1798316161143963802
 Animator:
   serializedVersion: 4

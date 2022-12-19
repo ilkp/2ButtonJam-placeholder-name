@@ -1,7 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
+[DisallowMultipleComponent]
 public class DifficultyTimer : MonoBehaviour
 {
 	public static DifficultyTimer Instance;
@@ -18,6 +18,7 @@ public class DifficultyTimer : MonoBehaviour
 
 	public void Restart()
 	{
+		m_step = 10f;
 		m_timer = 0f;
 		DifficultyStage = 1;
 	}
@@ -33,7 +34,7 @@ public class DifficultyTimer : MonoBehaviour
 		if (m_timer > m_step)
 		{
 			++DifficultyStage;
-			m_step *= 1.2f;
+			m_step *= 1.1f;
 			m_timer = 0f;
 		}
 	}
