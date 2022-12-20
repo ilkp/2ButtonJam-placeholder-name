@@ -15,6 +15,10 @@ public class PlayerStateMachine : MonoBehaviour
 		Death
 	}
 
+#if UNITY_EDITOR
+	public bool debugInvinsibility = false;
+#endif
+
 	public Action UIChanged;
 
 	public const int MAX_POWERUPS = 3;
@@ -132,15 +136,53 @@ public class PlayerStateMachine : MonoBehaviour
 	{
 		if (m_dead || m_haveInvinsibilityFrames || m_haveGodMode || enemy.IsSpawning)
 			return;
-		--Hp;
 		AudioManager.Instance.PlayClip(GameAssets.Instance.sound_playerHit[0]);
+		StartCoroutine(HitCameraShake());
+#if UNITY_EDITOR
+		if (!debugInvinsibility)
+		{
+			--Hp;
+			UIChanged?.Invoke();
+			if (Hp <= 0)
+			{
+				m_dead = true;
+				return;
+			}
+		}
+#else
+		--Hp;
 		UIChanged?.Invoke();
 		if (Hp <= 0)
 		{
 			m_dead = true;
 			return;
 		}
+#endif
 		StartCoroutine(InvinsibilityFrames());
+	}
+
+	private IEnumerator HitCameraShake()
+	{
+		float cameraSpeed = 40f;
+		Vector3[] points = new Vector3[6];
+		for (int i = 0; i < points.Length - 1; ++i)
+			points[i] = new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-0.25f, 0.25f), -10f);
+		points[points.Length - 1] = new Vector3(0f, 0f, -10f);
+		for (int i = 0; i < points.Length; ++i)
+		{
+			Vector3 direction = (points[i] - Camera.main.transform.position).normalized;
+			while ((points[i] - Camera.main.transform.position).magnitude > 0.01f)
+			{
+				Vector3 translate = Time.deltaTime * cameraSpeed * direction;
+				Vector3 cameraToPoint = points[i] - Camera.main.transform.position;
+				if (cameraToPoint.magnitude < translate.magnitude)
+					Camera.main.transform.position += cameraToPoint;
+				else
+					Camera.main.transform.position += translate;
+				yield return null;
+			}
+		}
+		Camera.main.transform.position = new Vector3(0f, 0f, -10f);
 	}
 
 	private IEnumerator InvinsibilityFrames()

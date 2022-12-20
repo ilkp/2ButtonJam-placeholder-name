@@ -49,16 +49,13 @@ public class Spawner : MonoBehaviour
 		}
 
 		// pickups
-		foreach (var pickup in m_pickups.Values)
+		foreach (PickupType type in m_pickups.Keys)
 		{
+			SpawnableData pickup = m_pickups[type];
 			if (pickup.nAlive < pickup.maxAlive && pickup.spawnTimer >= pickup.spawnTime)
 			{
 				pickup.spawnTimer = 0f;
-				GameObject go = Instantiate(pickup.prefab);
-				float angle = Random.Range(0f, 2 * Mathf.PI);
-				float distance = Random.Range(0f, GlobalConstants.MAP_RADIUS);
-				go.transform.position = distance * new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
-				++pickup.nAlive;
+				SpawnPickup(type);
 			}
 			else if (pickup.nAlive < pickup.maxAlive)
 			{
@@ -67,19 +64,34 @@ public class Spawner : MonoBehaviour
 		}
 
 		// enemies
-		foreach (var enemy in m_enemies.Values)
+		foreach (EnemyType type in m_enemies.Keys)
 		{
+			SpawnableData enemy = m_enemies[type];
 			if (enemy.nAlive < enemy.maxAlive && enemy.spawnTimer >= enemy.spawnTime)
 			{
 				enemy.spawnTimer = 0f;
-				GameObject go = Instantiate(enemy.prefab);
-				++enemy.nAlive;
+				SpawnEnemy(type);
 			}
 			else if (enemy.nAlive < enemy.maxAlive)
 			{
 				enemy.spawnTimer += Time.deltaTime;
 			}
 		}
+	}
+
+	public void SpawnEnemy(EnemyType type)
+	{
+		Instantiate(m_enemies[type].prefab);
+		++m_enemies[type].nAlive;
+	}
+
+	public void SpawnPickup(PickupType type)
+	{
+		GameObject go = Instantiate(m_pickups[type].prefab);
+		float angle = Random.Range(0f, 2 * Mathf.PI);
+		float distance = Random.Range(0f, GlobalConstants.MAP_RADIUS);
+		go.transform.position = distance * new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
+		++m_pickups[type].nAlive;
 	}
 
 	public void Restart()
