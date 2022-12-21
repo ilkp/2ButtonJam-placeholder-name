@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System;
 
 [CustomEditor(typeof(DebugActions))]
 public class DebugActionsEditor : Editor
@@ -14,15 +15,13 @@ public class DebugActionsEditor : Editor
 
 		DebugActions actions = (DebugActions)target;
 		player.debugInvinsibility = GUILayout.Toggle(player.debugInvinsibility, "Player invinsibility");
-		if (GUILayout.Button("Spawn Chaser"))
-			spawner.SpawnEnemy(EnemyType.Chaser);
-		if (GUILayout.Button("Spawn Rotator"))
-			spawner.SpawnEnemy(EnemyType.Rotator);
-		if (GUILayout.Button("Spawn Score Pickup"))
-			spawner.SpawnPickup(PickupType.Score);
-		if (GUILayout.Button("Spawn Charge Pickup"))
-			spawner.SpawnPickup(PickupType.Charge);
-		if (GUILayout.Button("Spawn PowerUp Pickup"))
-			spawner.SpawnPickup(PickupType.Powerup);
+		GUILayout.Label("Spawn enemies");
+		foreach (EnemyType type in Enum.GetValues(typeof(EnemyType)))
+			if (GUILayout.Button("Spawn " + type.ToString()))
+				spawner.SpawnEnemy(type);
+		GUILayout.Label("Spawn pickups");
+		foreach (PickupType type in Enum.GetValues(typeof(PickupType)))
+			if (GUILayout.Button("Spawn " + type.ToString()))
+				spawner.SpawnPickup(type);
 	}
 }

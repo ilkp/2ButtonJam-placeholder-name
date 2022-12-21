@@ -62,6 +62,15 @@ public class Spawner : MonoBehaviour
 					new() { limit = 10, maxAlive = 1, spawnTime = 5f },
 					new() { limit = 0, maxAlive = 2, spawnTime = 5f },
 				}
+			} },
+			{ PickupType.Bomb, new SpawnData() {
+				prefab = (GameObject)Resources.Load("Prefabs/BombPickupPrefab"),
+				diffIndex = 0,
+				diffPresets = new DifficultyPreset[]
+				{
+					new() { limit = 15, maxAlive = 0, spawnTime = 30f },
+					new() { limit = 0, maxAlive = 1, spawnTime = 30f }
+				}
 			} }
 		};
 		m_enemies = new Dictionary<EnemyType, SpawnData>()
@@ -140,8 +149,17 @@ public class Spawner : MonoBehaviour
 	public void SpawnPickup(PickupType type)
 	{
 		GameObject go = Instantiate(m_pickups[type].prefab);
-		float angle = Random.Range(0f, 2 * Mathf.PI);
-		float distance = Random.Range(0f, GlobalConstants.MAP_RADIUS);
+		float angle;
+		float distance;
+		Vector3 playerPos = GameObject.FindGameObjectWithTag("Player").transform.position;
+		int attempts = 0;
+		int maxAttempts = 5;
+		do
+		{
+			++attempts;
+			angle = Random.Range(0f, 2 * Mathf.PI);
+			distance = Random.Range(0f, GlobalConstants.MAP_RADIUS);
+		} while (attempts < maxAttempts && (playerPos - distance * new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f)).magnitude < 1.0f);
 		go.transform.position = distance * new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f);
 		++m_pickups[type].nAlive;
 	}

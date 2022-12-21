@@ -140,7 +140,7 @@ public class PlayerStateMachine : MonoBehaviour
 		if (m_dead || m_haveInvinsibilityFrames || m_haveGodMode || enemy.IsSpawning)
 			return;
 		AudioManager.Instance.PlayClip(GameAssets.Instance.sound_playerHit[0]);
-		StartCoroutine(HitCameraShake());
+		Camera.main.GetComponent<CameraEffects>().StartPlayerHitShake();
 #if UNITY_EDITOR
 		if (!debugInvinsibility)
 		{
@@ -162,30 +162,6 @@ public class PlayerStateMachine : MonoBehaviour
 		}
 #endif
 		StartCoroutine(InvinsibilityFrames());
-	}
-
-	private IEnumerator HitCameraShake()
-	{
-		float cameraSpeed = 40f;
-		Vector3[] points = new Vector3[6];
-		for (int i = 0; i < points.Length - 1; ++i)
-			points[i] = new Vector3(UnityEngine.Random.Range(-1f, 1f), UnityEngine.Random.Range(-0.25f, 0.25f), -10f);
-		points[points.Length - 1] = new Vector3(0f, 0f, -10f);
-		for (int i = 0; i < points.Length; ++i)
-		{
-			Vector3 direction = (points[i] - Camera.main.transform.position).normalized;
-			while ((points[i] - Camera.main.transform.position).magnitude > 0.01f)
-			{
-				Vector3 translate = Time.deltaTime * cameraSpeed * direction;
-				Vector3 cameraToPoint = points[i] - Camera.main.transform.position;
-				if (cameraToPoint.magnitude < translate.magnitude)
-					Camera.main.transform.position += cameraToPoint;
-				else
-					Camera.main.transform.position += translate;
-				yield return null;
-			}
-		}
-		Camera.main.transform.position = new Vector3(0f, 0f, -10f);
 	}
 
 	private IEnumerator InvinsibilityFrames()
@@ -249,9 +225,6 @@ public class PlayerStateMachine : MonoBehaviour
 	{
 		switch (type)
 		{
-			case PickupType.Life:
-				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
-				break;
 			case PickupType.Score:
 				AudioManager.Instance.PlayClip(GameAssets.Instance.sound_pickupScore[0]);
 				AddScore(100);
@@ -281,6 +254,11 @@ public class PlayerStateMachine : MonoBehaviour
 					PowerupCharges = 0;
 					SetLance(true);
 				}
+				break;
+			case PickupType.Bomb:
+				GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+				for (int i = 0; i < enemies.Length; ++i)
+					enemies[i].GetComponent<EnemyStateMachine>().TakeHit();
 				break;
 		}
 		UIChanged?.Invoke();
