@@ -21,7 +21,7 @@ public class DebugActionsEditor : Editor
 		if (GUILayout.Button("Spawn Score Pickup"))
 			spawner.SpawnPickup(PickupType.Score);
 		if (GUILayout.Button("Spawn Charge Pickup"))
-			spawner.SpawnPickup(PickupType.PowerupCharge);
+			spawner.SpawnPickup(PickupType.Charge);
 		if (GUILayout.Button("Spawn PowerUp Pickup"))
 			spawner.SpawnPickup(PickupType.Powerup);
 	}

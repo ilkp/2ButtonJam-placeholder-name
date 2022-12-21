@@ -34,25 +34,25 @@ public class PlayerStateMachine : MonoBehaviour
 	private const float INVINSIBILITY_FRAMES = 2f;
 	private const float DRAG = 1.2f;
 
-	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
-	private KeyCode m_leftKey = KeyCode.RightArrow;
-	private KeyCode m_rightKey = KeyCode.LeftArrow;
-
 	[SerializeField] private Animator m_burstAnimator;
 	[SerializeField] private GameObject m_playerGraphics;
 	[SerializeField] private GameObject m_lanceGraphics;
 	[SerializeField] private float m_maxAngularSpeed = 20f;
 	[SerializeField] private float m_angularAcceleration = 100f;
 	[SerializeField] private float m_dashSpeed = 20f;
+
+	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
+	private KeyCode m_leftKey = KeyCode.RightArrow;
+	private KeyCode m_rightKey = KeyCode.LeftArrow;
 	private (float, Sprite[])[] m_playerSprites;
 	private (float, Sprite[])[] m_lanceSprites;
+	private bool m_lanceIsBreaking = false;
 	private int m_burstDirection;
 	private float m_godModeTimer = 0f;
 	private bool m_dead = false;
 	private float m_angularVelocity = 0f;
 	private State m_state;
 	private bool m_haveInvinsibilityFrames = false;
-
 	private Vector3 m_previousFramePosition;
 	private bool m_haveLance = false;
 	private bool m_haveGodMode = false;
@@ -114,11 +114,14 @@ public class PlayerStateMachine : MonoBehaviour
 		if (collision.CompareTag("Enemy"))
 		{
 			//Vector3 prevPositionToCurrent = transform.position - m_previousFramePosition;
-			if (m_haveLance || m_haveGodMode)// && prevPositionToCurrent.magnitude > 0f && Vector3.Angle(prevPositionToCurrent, collision.transform.position - transform.position) <= LANCE_DAMAGE_ARC)
+			if (m_haveGodMode)
 			{
 				collision.GetComponent<EnemyStateMachine>().TakeHit();
-				if (!m_haveGodMode)
-					SetLance(false);
+			}
+			else if (m_haveLance && m_state == State.Dash)
+			{
+				collision.GetComponent<EnemyStateMachine>().TakeHit();
+				m_lanceIsBreaking = true;
 			}
 			else
 			{
@@ -253,7 +256,7 @@ public class PlayerStateMachine : MonoBehaviour
 				AudioManager.Instance.PlayClip(GameAssets.Instance.sound_pickupScore[0]);
 				AddScore(100);
 				break;
-			case PickupType.PowerupCharge:
+			case PickupType.Charge:
 				PowerupCharges = Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
 				if (AudioManager.Instance)
 					AudioManager.Instance.PlayClip(GameAssets.Instance.sound_pickupPowerup[0]);
@@ -309,6 +312,11 @@ public class PlayerStateMachine : MonoBehaviour
 		float dashTimer = 0f;
 		m_angularVelocity = 0f;
 		transform.position = transform.position.normalized * GlobalConstants.MAP_RADIUS;
+		if (m_lanceIsBreaking)
+		{
+			SetLance(false);
+			m_lanceIsBreaking = false;
+		}
 		do
 		{
 			yield return null;
