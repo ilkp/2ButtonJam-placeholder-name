@@ -374,6 +374,8 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private IEnumerator DeathState()
 	{
+		PlayfabManager.Instance.SendLeaderboard(Score);
+		PlayfabManager.Instance.GetLeaderboard();
 		UI.Instance.ActivateButtons();
 		AudioManager.Instance.PlayClip(GameAssets.Instance.sound_playerDeath[0]);
 		m_burstAnimator.SetBool("PlayerIsDead", true);
