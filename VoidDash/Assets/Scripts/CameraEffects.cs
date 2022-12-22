@@ -27,29 +27,27 @@ public class CameraEffects : MonoBehaviour
 	public void StartPlayerHitShake()
 	{
 		if (m_cameraShakeCoroutine != null)
-		{
 			StopCoroutine(m_cameraShakeCoroutine);
-			m_cameraShakeTranslate = Vector3.zero;
-		}
 		StartCoroutine(CameraShake());
 	}
-
+	 
 	private IEnumerator CameraShake()
 	{
 		float cameraSpeed = 40f;
+		m_cameraShakeTranslate = Vector3.zero;
 		Vector3[] points = new Vector3[6];
 		for (int i = 0; i < points.Length - 1; ++i)
-			points[i] = new Vector3(Random.Range(-1f, 1f), Random.Range(-0.25f, 0.25f), DEFAULT_Z);
-		points[points.Length - 1] = DEFAULT_POS;
+			points[i] = new Vector3(Random.Range(-1f, 1f), Random.Range(-0.25f, 0.25f), 0f);
+		points[points.Length - 1] = Vector3.zero;
 		for (int i = 0; i < points.Length; ++i)
 		{
-			Vector3 direction = (points[i] - Camera.main.transform.position).normalized;
-			while ((points[i] - Camera.main.transform.position).magnitude > 0.01f)
+			Vector3 direction = (points[i] - m_cameraShakeTranslate).normalized;
+			while ((points[i] - m_cameraShakeTranslate).magnitude > 0.01f)
 			{
 				Vector3 translate = Time.deltaTime * cameraSpeed * direction;
-				Vector3 cameraToPoint = points[i] - Camera.main.transform.position;
+				Vector3 cameraToPoint = points[i] - m_cameraShakeTranslate;
 				if (cameraToPoint.magnitude < translate.magnitude)
-					m_cameraShakeTranslate += cameraToPoint;
+					m_cameraShakeTranslate = points[i];
 				else
 					m_cameraShakeTranslate += translate;
 				yield return null;
