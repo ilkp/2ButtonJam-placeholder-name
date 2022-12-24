@@ -81,6 +81,8 @@ public class EnemyChaserStateMachine : EnemyStateMachine
 				moveDirection = 1f;
 			else
 				moveDirection /= Mathf.Abs(moveDirection);
+			if (m_playerTransform.GetComponent<PlayerStateMachine>().HasGodMode)
+				moveDirection *= -1f;
 			m_currentAngularSpeed += Time.deltaTime * m_angularAcceleration * moveDirection;
 			m_currentAngularSpeed = Mathf.Clamp(m_currentAngularSpeed, -m_maxAngularSpeed, m_maxAngularSpeed);
 			m_animator.speed = Mathf.Clamp(Mathf.Abs(m_currentAngularSpeed) / m_maxAngularSpeed, 0.2f, 1f);

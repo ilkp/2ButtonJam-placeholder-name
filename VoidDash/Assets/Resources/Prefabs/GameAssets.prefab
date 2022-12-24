@@ -44,6 +44,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b06c5acc491f9f4a9529d2e24a32bb6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_sound_gameMusic:
+  - {fileID: 8300000, guid: 44be3d62d18d5c44cbe0b59b52b2933b, type: 3}
   m_sound_playerDeath:
   - {fileID: 8300000, guid: 39e8ecbc848fa204eaf89c4f33252d4f, type: 3}
   m_sound_dash:

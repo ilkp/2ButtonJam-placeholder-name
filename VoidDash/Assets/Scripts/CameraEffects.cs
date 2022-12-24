@@ -19,7 +19,7 @@ public class CameraEffects : MonoBehaviour
 	private void Update()
 	{
 		Vector3 totalTranslate = DEFAULT_POS;
-		totalTranslate += PLAYER_FOLLOW_STREGTH * GameObject.FindGameObjectWithTag("Player").transform.position;
+		//totalTranslate += PLAYER_FOLLOW_STREGTH * GameObject.FindGameObjectWithTag("Player").transform.position;
 		totalTranslate += m_cameraShakeTranslate;
 		m_cameraTransform.position = totalTranslate;
 	}

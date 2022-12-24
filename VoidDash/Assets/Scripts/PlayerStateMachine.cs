@@ -27,12 +27,14 @@ public class PlayerStateMachine : MonoBehaviour
 	public int PowerupCharges { get; private set; } = 0;
 	public int Hp { get; private set; } = MAX_HP;
 	public int Score { get; private set; } = 0;
+	public bool HasGodMode { get; private set; } = false;
 
 	private const float GOD_MODE_TIME = 10f;
 	private const float LANCE_DISTANCE = 0.75f;
 	private const float LANCE_DAMAGE_ARC = 45f;
 	private const float INVINSIBILITY_FRAMES = 2f;
 	private const float DRAG = 1.2f;
+	private const float GOD_SPEED_MULTIPLIER = 2f;
 
 	[SerializeField] private Animator m_burstAnimator;
 	[SerializeField] private GameObject m_playerGraphics;
@@ -44,18 +46,17 @@ public class PlayerStateMachine : MonoBehaviour
 	private Dictionary<State, string> m_stateFunctionNames = new Dictionary<State, string>();
 	private KeyCode m_leftKey = KeyCode.RightArrow;
 	private KeyCode m_rightKey = KeyCode.LeftArrow;
-	private (float, Sprite[])[] m_playerSprites;
-	private (float, Sprite[])[] m_lanceSprites;
+	private State m_state;
+	private (float, Sprite[])[] m_playerSpriteAngles;
+	private (float, Sprite[])[] m_lanceSpriteAngles;
+	private bool m_haveInvinsibilityFrames = false;
 	private bool m_lanceIsBreaking = false;
+	private bool m_haveLance = false;
+	private bool m_dead = false;
 	private int m_burstDirection;
 	private float m_godModeTimer = 0f;
-	private bool m_dead = false;
 	private float m_angularVelocity = 0f;
-	private State m_state;
-	private bool m_haveInvinsibilityFrames = false;
 	private Vector3 m_previousFramePosition;
-	private bool m_haveLance = false;
-	private bool m_haveGodMode = false;
 
 
 	private void Awake()
@@ -78,7 +79,7 @@ public class PlayerStateMachine : MonoBehaviour
 			m_stateFunctionNames.Add(state, methodName);
 		}
 
-		m_playerSprites = new (float, Sprite[])[]
+		m_playerSpriteAngles = new (float, Sprite[])[]
 		{
 			new (45f * 0.5f, new[]{GameAssets.Instance.sprite_player[2], GameAssets.Instance.sprite_player[2] }),
 			new (45f * 1.5f, new[]{GameAssets.Instance.sprite_player[1], GameAssets.Instance.sprite_player[3] }),
@@ -86,7 +87,7 @@ public class PlayerStateMachine : MonoBehaviour
 			new (45f * 3.5f, new[]{GameAssets.Instance.sprite_player[7], GameAssets.Instance.sprite_player[5] }),
 			new (45f * 4.0f, new[]{GameAssets.Instance.sprite_player[6], GameAssets.Instance.sprite_player[6] })
 		};
-		m_lanceSprites = new (float, Sprite[])[]
+		m_lanceSpriteAngles = new (float, Sprite[])[]
 		{
 			new (45f * 0.5f, new[]{GameAssets.Instance.sprite_lance[2], GameAssets.Instance.sprite_lance[2] }),
 			new (45f * 1.5f, new[]{GameAssets.Instance.sprite_lance[1], GameAssets.Instance.sprite_lance[3] }),
@@ -114,7 +115,7 @@ public class PlayerStateMachine : MonoBehaviour
 		if (collision.CompareTag("Enemy"))
 		{
 			//Vector3 prevPositionToCurrent = transform.position - m_previousFramePosition;
-			if (m_haveGodMode)
+			if (HasGodMode)
 			{
 				collision.GetComponent<EnemyStateMachine>().TakeHit();
 			}
@@ -137,7 +138,7 @@ public class PlayerStateMachine : MonoBehaviour
 
 	private void TakeHit(EnemyStateMachine enemy)
 	{
-		if (m_dead || m_haveInvinsibilityFrames || m_haveGodMode || enemy.IsSpawning)
+		if (m_dead || m_haveInvinsibilityFrames || HasGodMode || enemy.IsSpawning)
 			return;
 		AudioManager.Instance.PlayClip(GameAssets.Instance.sound_playerHit[0]);
 		Camera.main.GetComponent<CameraEffects>().StartPlayerHitShake();
@@ -161,16 +162,16 @@ public class PlayerStateMachine : MonoBehaviour
 			return;
 		}
 #endif
-		StartCoroutine(InvinsibilityFrames());
+		StartCoroutine(InvinsibilityFrames(INVINSIBILITY_FRAMES));
 	}
 
-	private IEnumerator InvinsibilityFrames()
+	private IEnumerator InvinsibilityFrames(float seconds)
 	{
 		m_haveInvinsibilityFrames = true;
 		float timer = 0f;
 		float timerB = 0f;
 		m_playerGraphics.GetComponent<SpriteRenderer>().enabled = false;
-		while (timer < INVINSIBILITY_FRAMES)
+		while (timer < seconds)
 		{
 			timer += Time.deltaTime;
 			timerB += Time.deltaTime;
@@ -190,22 +191,24 @@ public class PlayerStateMachine : MonoBehaviour
 	private void StartGodMode()
 	{
 		m_godModeTimer = GOD_MODE_TIME;
-		if (!m_haveGodMode)
+		if (!HasGodMode)
 			StartCoroutine(GodMode());
 	}
 
 	private IEnumerator GodMode()
 	{
-		m_haveGodMode = true;
-		m_playerGraphics.GetComponent<SpriteRenderer>().color = new Color(250f, 0f, 250f, 250f);
+		HasGodMode = true;
+		Color originalColor = m_playerGraphics.GetComponent<SpriteRenderer>().material.color;
+		Color effectColor = new Color(150f, 0f, 150f, 255f);
+		m_playerGraphics.GetComponent<SpriteRenderer>().material.color = effectColor;
 		while (m_godModeTimer > 0f)
 		{
 			m_godModeTimer -= Time.deltaTime;
 			yield return null;
 		}
-		m_playerGraphics.GetComponent<SpriteRenderer>().color = new Color(255f, 255f, 255f, 250f);
-		m_haveGodMode = false;
-		StartCoroutine(InvinsibilityFrames());
+		m_playerGraphics.GetComponent<SpriteRenderer>().material.color = originalColor;
+		HasGodMode = false;
+		StartCoroutine(InvinsibilityFrames(INVINSIBILITY_FRAMES));
 	}
 	
 	private void SetLance(bool set)
@@ -237,23 +240,19 @@ public class PlayerStateMachine : MonoBehaviour
 			case PickupType.Powerup:
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
 				if (PowerupCharges > 0)
+				{
 					AudioManager.Instance.PlayClip(GameAssets.Instance.sound_getLance[0]);
+					SetLance(true);
+				}
 				if (PowerupCharges == 3)
 				{
-					PowerupCharges = 0;
 					StartGodMode();
-					SetLance(true);
 				}
 				else if (PowerupCharges == 2)
 				{
-					PowerupCharges = 0;
-					StartGodMode();
+					StartCoroutine(InvinsibilityFrames(INVINSIBILITY_FRAMES * 2f));
 				}
-				else if (PowerupCharges == 1)
-				{
-					PowerupCharges = 0;
-					SetLance(true);
-				}
+				PowerupCharges = 0;
 				break;
 			case PickupType.Bomb:
 				GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
@@ -301,12 +300,12 @@ public class PlayerStateMachine : MonoBehaviour
 
 			// Handle animation
 			float playerAngle = Mathf.Rad2Deg * Mathf.Acos(transform.position.x / transform.position.magnitude);
-			for (int i = 0; i < m_playerSprites.Length; ++i)
+			for (int i = 0; i < m_playerSpriteAngles.Length; ++i)
 			{
-				if (playerAngle <= m_playerSprites[i].Item1)
+				if (playerAngle <= m_playerSpriteAngles[i].Item1)
 				{
-					m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSprites[i].Item2[transform.position.y > 0f ? 0 : 1];
-					m_lanceGraphics.GetComponent<SpriteRenderer>().sprite = m_lanceSprites[i].Item2[transform.position.y > 0f ? 0 : 1];
+					m_playerGraphics.GetComponent<SpriteRenderer>().sprite = m_playerSpriteAngles[i].Item2[transform.position.y > 0f ? 0 : 1];
+					m_lanceGraphics.GetComponent<SpriteRenderer>().sprite = m_lanceSpriteAngles[i].Item2[transform.position.y > 0f ? 0 : 1];
 					break;
 				}
 			}
@@ -320,7 +319,7 @@ public class PlayerStateMachine : MonoBehaviour
 				moveDirection += 1;
 			m_angularVelocity += Time.deltaTime * (m_angularAcceleration * moveDirection - DRAG * m_angularVelocity);
 			m_angularVelocity = Mathf.Clamp(m_angularVelocity, -m_maxAngularSpeed, m_maxAngularSpeed);
-			transform.RotateAround(GlobalConstants.ROTATION_POINT, GlobalConstants.ROTATION_AXIS, m_angularVelocity * Time.deltaTime);
+			transform.RotateAround(GlobalConstants.ROTATION_POINT, GlobalConstants.ROTATION_AXIS, m_angularVelocity * Time.deltaTime * (HasGodMode ? GOD_SPEED_MULTIPLIER : 1f));
 			transform.rotation = Quaternion.identity;
 			if (Input.GetKey(m_leftKey) && Input.GetKey(m_rightKey))
 				dashTimer += Time.deltaTime;

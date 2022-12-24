@@ -8,7 +8,7 @@ public class Spawner : MonoBehaviour
 
 	private class DifficultyPreset
 	{
-		public int timeToExit;
+		public int levelToExit;
 		public int maxAlive;
 		public float spawnTime;
 	}
@@ -38,38 +38,33 @@ public class Spawner : MonoBehaviour
 		{
 			{ PickupType.Score, new SpawnData() {
 				prefab = (GameObject)Resources.Load("Prefabs/ScorePickupPrefab"),
-				diffIndex = 0,
 				diffPresets = new DifficultyPreset[]
 				{
-					new() { timeToExit = 5, maxAlive = 1, spawnTime = 10f },
-					new() { timeToExit = 15, maxAlive = 2, spawnTime = 10f },
-					new() { timeToExit = 0, maxAlive = 3, spawnTime = 10f }
+					new() { levelToExit = 5, maxAlive = 1, spawnTime = 7.5f },
+					new() { levelToExit = 15, maxAlive = 2, spawnTime = 7.5f }
 				}
 			} } ,
 			{ PickupType.Powerup, new SpawnData() {
 				prefab = (GameObject)Resources.Load("Prefabs/PowerupPickupPrefab"),
-				diffIndex = 0,
 				diffPresets = new DifficultyPreset[]
 				{
-					new() { timeToExit = 0, maxAlive = 1, spawnTime = 15 },
+					new() { levelToExit = 0, maxAlive = 1, spawnTime = 15f },
 				}
 			} },
 			{ PickupType.Charge, new SpawnData() {
 				prefab = (GameObject)Resources.Load("Prefabs/ChargePickupPrefab"),
-				diffIndex = 0,
 				diffPresets = new DifficultyPreset[]
 				{
-					new() { timeToExit = 10, maxAlive = 1, spawnTime = 5f },
-					new() { timeToExit = 0, maxAlive = 2, spawnTime = 5f },
+					new() { levelToExit = 10, maxAlive = 1, spawnTime = 12f },
+					new() { levelToExit = 0, maxAlive = 1, spawnTime = 10f },
 				}
 			} },
 			{ PickupType.Bomb, new SpawnData() {
 				prefab = (GameObject)Resources.Load("Prefabs/BombPickupPrefab"),
-				diffIndex = 0,
 				diffPresets = new DifficultyPreset[]
 				{
-					new() { timeToExit = 15, maxAlive = 0, spawnTime = 30f },
-					new() { timeToExit = 0, maxAlive = 1, spawnTime = 30f }
+					new() { levelToExit = 12, maxAlive = 0, spawnTime = 30f },
+					new() { levelToExit = 0, maxAlive = 1, spawnTime = 30f }
 				}
 			} }
 		};
@@ -80,10 +75,10 @@ public class Spawner : MonoBehaviour
 				diffIndex = 0,
 				diffPresets = new DifficultyPreset[]
 				{
-					new() { timeToExit = 5, maxAlive = 1, spawnTime = 5f },
-					new() { timeToExit = 10, maxAlive = 1, spawnTime = 15f },
-					new() { timeToExit = 15, maxAlive = 2, spawnTime = 13f },
-					new() { timeToExit = 0, maxAlive = 3, spawnTime = 11f },
+					new() { levelToExit = 1, maxAlive = 1, spawnTime = 5f },
+					new() { levelToExit = 10, maxAlive = 1, spawnTime = 15f },
+					new() { levelToExit = 15, maxAlive = 2, spawnTime = 13f },
+					new() { levelToExit = 0, maxAlive = 3, spawnTime = 11f },
 				}
 			} },
 			{ EnemyType.Rotator, new SpawnData() {
@@ -91,9 +86,9 @@ public class Spawner : MonoBehaviour
 				diffIndex = 0,
 				diffPresets = new DifficultyPreset[]
 				{
-					new() { timeToExit = 6, maxAlive = 1, spawnTime = 10f },
-					new() { timeToExit = 12, maxAlive = 2, spawnTime = 10f },
-					new() { timeToExit = 0, maxAlive = 3, spawnTime = 8.5f },
+					new() { levelToExit = 6, maxAlive = 1, spawnTime = 10f },
+					new() { levelToExit = 12, maxAlive = 2, spawnTime = 10f },
+					new() { levelToExit = 0, maxAlive = 3, spawnTime = 10f },
 				}
 			} }
 		};
@@ -112,7 +107,7 @@ public class Spawner : MonoBehaviour
 			{
 				pickup.spawnTimer = 0f;
 				SpawnPickup(type);
-				if (pickup.diffIndex < pickup.diffPresets.Length - 1 && currentDifficulty > diffPreset.timeToExit)
+				if (pickup.diffIndex < pickup.diffPresets.Length - 1 && currentDifficulty > diffPreset.levelToExit)
 					++pickup.diffIndex;
 			}
 			else if (pickup.nAlive < diffPreset.maxAlive)
@@ -130,7 +125,7 @@ public class Spawner : MonoBehaviour
 			{
 				enemy.spawnTimer = 0f;
 				SpawnEnemy(type);
-				if (enemy.diffIndex < enemy.diffPresets.Length - 1 && currentDifficulty > diffPreset.timeToExit)
+				if (enemy.diffIndex < enemy.diffPresets.Length - 1 && currentDifficulty > diffPreset.levelToExit)
 					++enemy.diffIndex;
 			}
 			else if (enemy.nAlive < diffPreset.maxAlive)

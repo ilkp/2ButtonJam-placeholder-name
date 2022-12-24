@@ -7,6 +7,9 @@ public class GameAssets : MonoBehaviour
 	public static GameAssets Instance;
 
 	[Header("Audio")]
+	[SerializeField] private AudioClip[] m_sound_gameMusic;
+	public AudioClip[] sound_gameMusic { get { return m_sound_gameMusic; } set { m_sound_gameMusic = value; } }
+
 	[Header("Player")]
 	[SerializeField] private AudioClip[] m_sound_playerDeath;
 	public AudioClip[] sound_playerDeath { get { return m_sound_playerDeath; } set { m_sound_playerDeath = value; } }
