@@ -234,8 +234,7 @@ public class PlayerStateMachine : MonoBehaviour
 				break;
 			case PickupType.Charge:
 				PowerupCharges = Mathf.Clamp(++PowerupCharges, 0, MAX_POWERUPS);
-				if (AudioManager.Instance)
-					AudioManager.Instance.PlayClip(GameAssets.Instance.sound_pickupPowerup[0]);
+				AudioManager.Instance.PlayClip(GameAssets.Instance.sound_pickupPowerup[0]);
 				break;
 			case PickupType.Powerup:
 				Hp = Mathf.Clamp(++Hp, 0, MAX_HP);
