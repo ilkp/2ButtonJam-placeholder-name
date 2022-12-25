@@ -103,17 +103,19 @@ public class Spawner : MonoBehaviour
 		{
 			SpawnData pickup = m_pickups[type];
 			DifficultyPreset diffPreset = pickup.diffPresets[pickup.diffIndex];
+			pickup.spawnTimer += Time.deltaTime;
 			if (pickup.nAlive < diffPreset.maxAlive && pickup.spawnTimer >= diffPreset.spawnTime)
 			{
 				pickup.spawnTimer = 0f;
 				SpawnPickup(type);
-				if (pickup.diffIndex < pickup.diffPresets.Length - 1 && currentDifficulty > diffPreset.levelToExit)
-					++pickup.diffIndex;
 			}
-			else if (pickup.nAlive < diffPreset.maxAlive)
+			else if (pickup.spawnTimer >= 3f * diffPreset.spawnTime)
 			{
-				pickup.spawnTimer += Time.deltaTime;
+				pickup.spawnTimer = 0f;
+				SpawnPickup(type);
 			}
+			if (pickup.diffIndex < pickup.diffPresets.Length - 1 && currentDifficulty > diffPreset.levelToExit)
+				++pickup.diffIndex;
 		}
 
 		// enemies
@@ -121,17 +123,19 @@ public class Spawner : MonoBehaviour
 		{
 			SpawnData enemy = m_enemies[type];
 			DifficultyPreset diffPreset = enemy.diffPresets[enemy.diffIndex];
+			enemy.spawnTimer += Time.deltaTime;
 			if (enemy.nAlive < diffPreset.maxAlive && enemy.spawnTimer >= diffPreset.spawnTime)
 			{
 				enemy.spawnTimer = 0f;
 				SpawnEnemy(type);
-				if (enemy.diffIndex < enemy.diffPresets.Length - 1 && currentDifficulty > diffPreset.levelToExit)
-					++enemy.diffIndex;
 			}
-			else if (enemy.nAlive < diffPreset.maxAlive)
+			else if (enemy.spawnTimer >= 3f * diffPreset.spawnTime)
 			{
-				enemy.spawnTimer += Time.deltaTime;
+				enemy.spawnTimer = 0f;
+				SpawnEnemy(type);
 			}
+			if (enemy.diffIndex < enemy.diffPresets.Length - 1 && currentDifficulty > diffPreset.levelToExit)
+				++enemy.diffIndex;
 		}
 	}
 

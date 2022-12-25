@@ -27,11 +27,14 @@ public class AudioManager : MonoBehaviour
 
 	private void Start()
 	{
-		AudioSource audioSource = m_gameMusicSource.AddComponent<AudioSource>();
-		audioSource.clip = GameAssets.Instance.sound_gameMusic[0];
-		audioSource.loop = true;
-		audioSource.volume = 0.1f;
-		m_gameMusicSource.GetComponent<AudioSource>().Play();
+		if (m_gameMusicSource.GetComponent<AudioSource>() == null)
+		{
+			AudioSource audioSource = m_gameMusicSource.AddComponent<AudioSource>();
+			audioSource.clip = GameAssets.Instance.sound_gameMusic[0];
+			audioSource.loop = true;
+			audioSource.volume = 0.1f;
+			m_gameMusicSource.GetComponent<AudioSource>().Play();
+		}
 	}
 
 	public void SetMusicPitch(float pitch)
